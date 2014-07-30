@@ -27,9 +27,9 @@ Thumbs.db
 .bundle/
 log/*.log
 pkg/
-test/dummy/db/*.sqlite3
-test/dummy/db/*.sqlite3-journal
-test/dummy/tmp/
+spec/dummy/db/*.sqlite3
+spec/dummy/db/*.sqlite3-journal
+spec/dummy/tmp/
 
 Gemfile.lock
 .rspec
