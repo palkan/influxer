@@ -1,4 +1,7 @@
 module Influxer
+  class MetricsError < StandardError; end
+  class MetricsInvalid < MetricsError; end
+  
   class Metrics
     include ActiveModel::Model
     include ActiveModel::Validations
@@ -7,8 +10,6 @@ module Influxer
     define_model_callbacks :write
 
     class << self
-      @before_write = []
-
       def attributes(*attrs)
         attrs.each do |name|
           define_method("#{name}=") do |val|
@@ -20,9 +21,34 @@ module Influxer
           end
         end
       end
-    end
 
-    attributes :time
+      def inherited(subclass)
+        subclass.set_series
+      end
+    
+      def set_series(*args)
+        if args.empty?
+          matches = self.to_s.match(/^(.*)Metrics$/)
+          if matches.nil?
+            @series = self.to_s.underscore
+          else
+            @series = matches[1].split("::").join("_").underscore
+          end
+        elsif args.first.is_a?(Proc)
+          @series = args.first
+        else
+          @series = args.join(",")
+        end
+      end
+
+      def series
+        @series
+      end
+
+      def all
+        Relation.new self
+      end
+    end
 
     def initialize(attributes = {})
       @attributes = {}
@@ -31,7 +57,7 @@ module Influxer
     end
 
     def write
-      raise ::StandardError.new('Cannot write the same metrics twice') if self.persisted?
+      raise MetricsError.new('Cannot write the same metrics twice') if self.persisted?
 
       return false if self.invalid?
 
@@ -41,7 +67,7 @@ module Influxer
     end
 
     def write!
-      raise ::StandardError.new('Validation failed') if self.invalid?
+      raise MetricsInvalid.new('Validation failed') if self.invalid?
       self.write
     end
 
@@ -52,5 +78,11 @@ module Influxer
     def persisted?
       @persisted
     end
+
+    def series
+      self.class.series.is_a?(Proc) ? self.class.series.call(self) : self.class.series
+    end
+
+    attributes :time
   end
 end 

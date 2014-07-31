@@ -1,7 +1,10 @@
+require 'influxer/version'
+
 module Influxer
-  require 'influxer/version'
+  require 'influxer/config'
+  require 'influxer/adapter'
   require 'influxer/metrics/metrics'
-  require 'influxer/metrics/metrics_relation'
+  require 'influxer/metrics/relation'
 
   module Model
     require 'influxer/model'
