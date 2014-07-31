@@ -1,7 +1,10 @@
 require 'spec_helper'
 
-describe Influxer::MetricsRelation do
-    let(:rel) { Influxer::MetricsRelation.new DummyMetrics}
+describe Influxer::Relation do
+    let(:rel) { Influxer::Relation.new DummyMetrics}
+    
+    specify { expect(rel).to respond_to :write}
+    specify { expect(rel).to respond_to :build}
 
     # read
     specify { expect(rel).to respond_to :select }

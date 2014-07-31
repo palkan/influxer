@@ -15,10 +15,15 @@ module Influxer
 
 
     def write(params = {})
+      build params
+      @instance.write
+    end
+
+    def build(params = {})
       params.each do |key,val|
         @instance.send("#{key}=", val) if @instance.respond_to?(key)
       end
-      @instance.write
+      @instance
     end
 
     # accepts strings and symbols only
@@ -94,7 +99,8 @@ module Influxer
 
     protected
       def load
-
+        @records = @instance.client.query to_sql
+        @loaded = true
       end
 
       def loaded?

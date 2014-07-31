@@ -10,6 +10,8 @@ module Influxer
     define_model_callbacks :write
 
     class << self
+      delegate :select, :where, :group, :limit, :delete_all, to: :all
+
       def attributes(*attrs)
         attrs.each do |name|
           define_method("#{name}=") do |val|
@@ -72,6 +74,7 @@ module Influxer
     end
 
     def write_point
+      client.write_point series, @attributes
       @persisted = true
     end 
 
@@ -81,6 +84,10 @@ module Influxer
 
     def series
       self.class.series.is_a?(Proc) ? self.class.series.call(self) : self.class.series
+    end
+
+    def client
+      Influxer.client
     end
 
     attributes :time
