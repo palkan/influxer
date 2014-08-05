@@ -1,14 +1,15 @@
 [![Build Status](https://travis-ci.org/palkan/influxer.svg?branch=master)](https://travis-ci.org/palkan/influxer)
 
-** Influxer
+## Influxer
 
 Use InfluxDB in your Rails (>4.0) application.
 
-*** Basic support
+### Basic support
+
 ToDo
 
-*** ActiveRecord 
+### ActiveRecord 
 
-```has_metrics```
+`has_metrics`
 
 ToDo
