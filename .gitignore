@@ -33,5 +33,4 @@ spec/dummy/tmp/
 
 Gemfile.lock
 .rspec
-
-
+*.gem
