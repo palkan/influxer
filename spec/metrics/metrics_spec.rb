@@ -12,12 +12,22 @@ describe Influxer::Metrics do
   specify {expect(metrics_class).to respond_to :set_series}  
   specify {expect(metrics_class).to respond_to :series}  
 
+  # query methods
+  
+  specify { expect(metrics_class).to respond_to :all}
+  specify { expect(metrics_class).to respond_to :where}
+  specify { expect(metrics_class).to respond_to :group}
+  specify { expect(metrics_class).to respond_to :limit}
+  specify { expect(metrics_class).to respond_to :select}
+  specify { expect(metrics_class).to respond_to :delete_all}
+
   # instance methods
 
   specify { expect(metrics).to respond_to :write }
   specify { expect(metrics).to respond_to :write! }
   specify { expect(metrics).to respond_to :persisted? }
   specify { expect(metrics).to respond_to :series}  
+
 
   # ActiveModel::Validations
 
@@ -110,6 +120,12 @@ describe Influxer::Metrics do
 
         m = dummy_with_proc_series.new user_id: 2, test_id:123
         expect(dummy_with_proc_series.series.call(m)).to eq "test/123/user/2"
+      end
+    end
+
+    describe "all method" do
+      it "should respond with relation" do
+        expect(metrics_class.all).to be_an_instance_of Influxer::Relation
       end
     end
 

@@ -9,7 +9,7 @@ describe Influxer::Config do
     expect(conf.host).to eq "test.host"   
   end
 
-  unless Rails.application.secrets.nil?
+  unless Rails.application.try(:secrets).nil?
     it "should load config from secrets" do
       expect(conf.username).to eq "test"
       expect(conf.password).to eq "test"   
