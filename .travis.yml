@@ -7,8 +7,6 @@ gemfile:
   - Gemfile
 
 matrix:
-  allow_failures:
-    - rvm: :jruby
   include:
     - rvm: 2.0.0
       gemfile: gemfiles/rails40.gemfile
@@ -20,10 +18,4 @@ matrix:
       gemfile: gemfiles/rails41.gemfile
 
     - rvm: 2.1
-      gemfile: gemfiles/rails41.gemfile
-
-    - rvm: jruby
-      gemfile: gemfiles/rails40.gemfile
-
-    - rvm: jruby
       gemfile: gemfiles/rails41.gemfile
