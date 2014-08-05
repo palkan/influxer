@@ -1,3 +1,0 @@
-= Influxer
-
-Use InfluxDB in your Rails application...
