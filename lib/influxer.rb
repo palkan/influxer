@@ -23,4 +23,9 @@ module Influxer
   def self.client
     @client ||= Client.new
   end
+
+  def self.reset
+    @config = nil
+    @client = nil
+  end
 end

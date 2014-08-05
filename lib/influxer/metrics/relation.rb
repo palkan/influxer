@@ -89,6 +89,13 @@ module Influxer
       @records
     end
 
+    def inspect
+      entries = to_a.take(11).map!(&:inspect)
+      entries[10] = '...' if entries.size == 11
+
+      "#<#{self.class.name} [#{entries.join(', ')}]>"
+    end
+
     def as_json
       to_a.as_json
     end
