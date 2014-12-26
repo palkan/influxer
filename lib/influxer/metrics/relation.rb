@@ -1,6 +1,6 @@
 module Influxer
   class Relation
-    
+    include Influxer::TimeGroup
     # Initialize new Relation for 'klass' (Class) metrics.
     # 
     # Available params:
@@ -73,6 +73,10 @@ module Influxer
         sql << "group by #{@group_values.join(",")}"
       end
 
+      unless @fill_value.nil?
+        sql << "fill(#{@fill_value})"
+      end
+
       unless @where_values.empty?
         sql << "where #{@where_values.join(" and ")}"
       end
@@ -119,6 +123,7 @@ module Influxer
         @select_values = []
         @group_values = []
         @where_values = []
+        @fill_value = nil
         @records = nil
         @loaded = false
         self

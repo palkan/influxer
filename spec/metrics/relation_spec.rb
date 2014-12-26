@@ -50,11 +50,65 @@ describe Influxer::Relation do
         xit "should recognize regexps as params" do
           expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy=~/^du.*/)" 
         end
+
+        xit "should handle negation" do
+          expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id!=1) and (dummy!~/^du.*/)" 
+        end
+
+        xit "should handle arrays" do
+          expect(rel.where(user_id: [1,2,3]).to_sql).to eq "select * from \"dummy\" where ((user_id=1) or (user_id=2) or (user_id=3))" 
+        end
       end
 
       describe "group" do
         it "should generate valid groups" do
           expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from \"dummy\" group by user_id,time(1m) fill(0)" 
+        end
+
+        describe "group by time predefined values" do
+          it "should group by hour" do
+            expect(rel.time(:hour).to_sql).to eq "select * from \"dummy\" group by time(1h)"
+          end
+
+          it "should group by minute" do
+            expect(rel.time(:minute).to_sql).to eq "select * from \"dummy\" group by time(1m)"
+          end
+
+          it "should group by second" do
+            expect(rel.time(:second).to_sql).to eq "select * from \"dummy\" group by time(1s)"
+          end
+
+          it "should group by millisecond" do
+            expect(rel.time(:ms).to_sql).to eq "select * from \"dummy\" group by time(1u)"
+          end
+
+          it "should group by day" do
+            expect(rel.time(:day).to_sql).to eq "select * from \"dummy\" group by time(1d)"
+          end
+
+          it "should group by week" do
+            expect(rel.time(:week).to_sql).to eq "select * from \"dummy\" group by time(1w)"
+          end
+
+          it "should group by month" do
+            expect(rel.time(:month).to_sql).to eq "select * from \"dummy\" group by time(30d)"
+          end
+
+          it "should group by hour and fill" do
+            expect(rel.time(:month, fill: 0).to_sql).to eq "select * from \"dummy\" group by time(30d) fill(0)"
+          end
+        end
+
+        it "should group by time with string value" do
+          expect(rel.time("4d").to_sql).to eq "select * from \"dummy\" group by time(4d)"
+        end
+
+        it "should group by time with string value and fill null" do
+          expect(rel.time("4d", fill: :null).to_sql).to eq "select * from \"dummy\" group by time(4d) fill(null)"
+        end
+
+        it "should group by time and other fields with fill null" do
+          expect(rel.time("4d", fill: 0).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d),dummy_id fill(0)"
         end
       end
 
