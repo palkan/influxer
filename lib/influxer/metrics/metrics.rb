@@ -32,14 +32,14 @@ module Influxer
         if args.empty?
           matches = self.to_s.match(/^(.*)Metrics$/)
           if matches.nil?
-            @series = self.to_s.underscore
+            @series = '"'+self.to_s.underscore+'"'
           else
-            @series = matches[1].split("::").join("_").underscore
+            @series = '"'+matches[1].split("::").join("_").underscore+'"'
           end
         elsif args.first.is_a?(Proc)
           @series = args.first
         else
-          @series = args.join(",")
+          @series = '"'+args.map{ |s| s.to_s.gsub(/\"/){ %q{\"} }}.join('","') +'"'
         end
       end
 
@@ -83,7 +83,7 @@ module Influxer
     end
 
     def series
-      self.class.series.is_a?(Proc) ? self.class.series.call(self) : self.class.series
+      self.class.series.is_a?(Proc) ? '"'+self.class.series.call(self).gsub(/\"/){%q{\"}}+'"'  : self.class.series
     end
 
     def client

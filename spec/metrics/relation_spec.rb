@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Influxer::Relation do
     let(:rel) { Influxer::Relation.new DummyMetrics}
+    let(:rel2) { Influxer::Relation.new DummyComplexMetrics}
     
     specify { expect(rel).to respond_to :write}
     specify { expect(rel).to respond_to :build}
@@ -19,37 +20,47 @@ describe Influxer::Relation do
 
 
     describe "sql generation" do
+      describe "from clause" do
+        it "should generate valid from if no conditions" do
+          expect(rel.to_sql).to eq "select * from \"dummy\""
+        end
+      end
+
       describe "select" do
         it "should select array of symbols" do
-          expect(rel.select(:user_id, :dummy_id).to_sql).to eq "select user_id,dummy_id from dummy" 
+          expect(rel.select(:user_id, :dummy_id).to_sql).to eq "select user_id,dummy_id from \"dummy\"" 
         end
 
         it "should select string" do
-          expect(rel.select("count(user_id)").to_sql).to eq "select count(user_id) from dummy" 
+          expect(rel.select("count(user_id)").to_sql).to eq "select count(user_id) from \"dummy\"" 
         end
       end
 
       describe "where" do
         it "should generate valid conditions from hash" do
           Timecop.freeze(Time.now) do
-            expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from dummy where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)" 
+            expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)" 
           end
         end
 
         it "should generate valid conditions from strings" do
-          expect(rel.where("time > now() - 1d").to_sql).to eq "select * from dummy where (time > now() - 1d)" 
+          expect(rel.where("time > now() - 1d").to_sql).to eq "select * from \"dummy\" where (time > now() - 1d)" 
+        end
+
+        xit "should recognize regexps as params" do
+          expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy=~/^du.*/)" 
         end
       end
 
       describe "group" do
         it "should generate valid groups" do
-          expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from dummy group by user_id,time(1m) fill(0)" 
+          expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from \"dummy\" group by user_id,time(1m) fill(0)" 
         end
       end
 
       describe "limit" do
         it "should generate valid limi" do
-          expect(rel.limit(100).to_sql).to eq "select * from dummy limit 100" 
+          expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100" 
         end
       end
     end
