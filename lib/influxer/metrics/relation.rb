@@ -176,7 +176,7 @@ module Influxer
       end
 
       def load
-        @records = @instance.client.query to_sql
+        @records = @instance.client.cached_query to_sql
         @loaded = true
       end
 

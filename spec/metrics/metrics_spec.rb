@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe Influxer::Metrics do
+  before do
+    allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|    
+      sql
+    end
+  end
 
   let(:metrics) { Influxer::Metrics.new }
   let(:metrics_class) { Influxer::Metrics }
