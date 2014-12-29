@@ -92,6 +92,12 @@ describe Influxer::Metrics do
       end
     end
 
+    let(:dummy_metrics_3) do
+      Class.new(Influxer::Metrics) do
+        set_series /^.*$/       
+      end
+    end
+
     let(:dummy_with_2_series) do
       Class.new(Influxer::Metrics) do
         set_series :events, :errors       
@@ -113,23 +119,27 @@ describe Influxer::Metrics do
 
     describe "set_series" do
       it "should set series name from class name by default" do
-        expect(DummyMetrics.series).to eq "\"dummy\""
+        expect(DummyMetrics.new.series).to eq "\"dummy\""
       end
 
       it "should set series from subclass" do
-        expect(dummy_metrics.series).to eq "\"dummies\""
+        expect(dummy_metrics.new.series).to eq "\"dummies\""
       end
 
-      it "should set series with quetes" do
-        expect(dummy_metrics_2.series).to eq "\"dummy \\\"A\\\"\""
+      it "should set series as regexp" do
+        expect(dummy_metrics_3.new.series).to eq '/^.*$/'
+      end
+
+      it "should set series with quotes" do
+        expect(dummy_metrics_2.new.series).to eq "\"dummy \\\"A\\\"\""
       end
 
       it "should set several series" do
-        expect(dummy_with_2_series.series).to eq "\"events\",\"errors\""
+        expect(dummy_with_2_series.new.series).to eq "\"events\",\"errors\""
       end
 
       it "should set several series with quotes" do
-        expect(dummy_with_2_series_quoted.series).to eq "\"dummy \\\"A\\\"\",\"dummy \\\"B\\\"\""
+        expect(dummy_with_2_series_quoted.new.series).to eq "\"dummy \\\"A\\\"\",\"dummy \\\"B\\\"\""
       end
 
       it "should set series from proc" do

@@ -29,7 +29,7 @@ module Influxer
       end
 
       unless options[:fill].nil?
-        @fill_value = (options[:fill] == :null) ? 'null' : options[:fill].to_i
+        @values[:fill] = (options[:fill] == :null) ? 'null' : options[:fill].to_i
       end
       self
     end

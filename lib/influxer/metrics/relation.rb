@@ -1,6 +1,11 @@
 module Influxer
   class Relation
     include Influxer::TimeQuery
+    
+    MULTI_VALUE_METHODS = [:select, :merge, :group, :where]
+
+    MULTI_VALUE_SIMPLE_METHODS = [:select, :merge, :group]
+
     # Initialize new Relation for 'klass' (Class) metrics.
     # 
     # Available params:
@@ -26,11 +31,21 @@ module Influxer
       @instance
     end
 
-    # accepts strings and symbols only
-    def select(*args)
-      return self if args.empty?
-      @select_values.concat args
-      self
+    MULTI_VALUE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}_values                   # def select_values
+          @values[:#{name}] ||= []            #   @values[:select] || []
+        end                                  # end
+      CODE
+    end
+
+    MULTI_VALUE_SIMPLE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(*args)                   # def select(*args)
+          #{name}_values.concat args         #  select_values.concat args
+          self                               #  self
+        end                                  # end
+      CODE
     end
 
     # accepts hash or strings conditions
@@ -44,42 +59,40 @@ module Influxer
       self
     end
 
-    def group(*args)
-      return self if args.empty?
-      @group_values.concat args
-      self
-    end
-
     def limit(val)
-      @limit = val
+      @values[:limit] = val
       self
     end
 
     def to_sql
       sql = ["select"]
 
-      if @select_values.empty?
+      if select_values.empty?
         sql << "*"
       else
-        sql << @select_values.join(",")
+        sql << select_values.join(",")
       end 
 
       sql << "from #{@instance.series}"
 
-      unless @group_values.empty?
-        sql << "group by #{@group_values.join(",")}"
+      unless merge_values.empty?
+        sql << "merge #{@instance.quote_series(merge_values.first)}"
       end
 
-      unless @fill_value.nil?
-        sql << "fill(#{@fill_value})"
+      unless group_values.empty?
+        sql << "group by #{group_values.join(",")}"
       end
 
-      unless @where_values.empty?
-        sql << "where #{@where_values.join(" and ")}"
+      unless @values[:fill].nil?
+        sql << "fill(#{@values[:fill]})"
       end
 
-      unless @limit.nil?
-        sql << "limit #{@limit}"
+      unless where_values.empty?
+        sql << "where #{where_values.join(" and ")}"
+      end
+
+      unless @values[:limit].nil?
+        sql << "limit #{@values[:limit]}"
       end
       sql.join " "
     end
@@ -109,7 +122,7 @@ module Influxer
       def build_where(args, hargs, negate)
         case
         when (args.present? and args[0].is_a?(String))
-          @where_values.concat args.map{|str| "(#{str})"}
+          where_values.concat args.map{|str| "(#{str})"}
         when hargs.present?
           build_hash_where(hargs, negate)
         else
@@ -119,7 +132,7 @@ module Influxer
 
       def build_hash_where(hargs, negate = false)
         hargs.each do |key, val|
-          @where_values << "(#{ build_eql(key,val,negate) })"
+          where_values << "(#{ build_eql(key,val,negate) })"
         end
       end
 
@@ -162,11 +175,7 @@ module Influxer
       end
 
       def reset
-        @limit = nil
-        @select_values = []
-        @group_values = []
-        @where_values = []
-        @fill_value = nil
+        @values = {}
         @records = nil
         @loaded = false
         self

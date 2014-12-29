@@ -8,7 +8,7 @@ ENV["RAILS_ENV"] ||= 'test'
 # SimpleCov.start
 
 require 'rspec'
-
+require 'pry'
 require 'rails/all'
 require 'rspec/rails'
 require 'timecop'

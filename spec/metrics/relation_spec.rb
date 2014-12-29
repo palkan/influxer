@@ -78,6 +78,16 @@ describe Influxer::Relation do
         end
       end
 
+      describe "merge" do
+        it "should merge with one series" do
+          expect(rel.merge("dubby").to_sql).to eq "select * from \"dummy\" merge \"dubby\""
+        end
+
+        it "should merge with one series as regexp" do
+          expect(rel.merge(/^du[1-6]+$/).to_sql).to eq "select * from \"dummy\" merge /^du[1-6]+$/"
+        end
+      end
+
       describe "past" do
         it "should work with predefined symbols" do
            expect(rel.past(:hour).to_sql).to eq "select * from \"dummy\" where (time > now() - 1h)"
