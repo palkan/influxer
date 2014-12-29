@@ -10,7 +10,7 @@ module Influxer
 
       module ClassMethods
         def default_scope(scope)
-          default_scopes << scope unless scope.nil?
+          self.default_scopes += [scope] unless scope.nil?
         end
 
         def unscoped
@@ -18,7 +18,7 @@ module Influxer
         end
 
         def default_scoped
-          default_scopes.inject(Relation.new(self)) do |rel, scope| 
+          self.default_scopes.inject(Relation.new(self)) do |rel, scope| 
             rel.merge!(rel.scoping{ scope.call })
           end
         end

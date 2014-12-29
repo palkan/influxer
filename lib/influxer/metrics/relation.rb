@@ -1,12 +1,16 @@
 require 'influxer/metrics/relation/time_query'
+require 'influxer/metrics/relation/fanout_query'
 
 module Influxer
   class Relation
     attr_reader :values
 
     include Influxer::TimeQuery
+    include Influxer::FanoutQuery
     
     MULTI_VALUE_METHODS = [:select, :where, :group]
+
+    MULTI_KEY_METHODS = [:fanout]
 
     SINGLE_VALUE_METHODS = [:fill, :limit, :merge, :time]
 
@@ -18,6 +22,14 @@ module Influxer
       class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}_values                          # def select_values
           @values[:#{name}] ||= []                  #   @values[:select] || []
+        end                                         # end
+      CODE
+    end
+
+    MULTI_KEY_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}_values                          # def fanout_values
+          @values[:#{name}] ||= {}                  #   @values[:fanout] || {}
         end                                         # end
       CODE
     end
@@ -94,7 +106,7 @@ module Influxer
         sql << select_values.uniq.join(",")
       end 
 
-      sql << "from #{ @instance.series }"
+      sql << "from #{ build_series_name }"
 
       unless merge_value.nil?
         sql << "merge #{ @instance.quote_series(merge_value) }"
@@ -162,6 +174,10 @@ module Influxer
         (@values[method]||=[]).concat(rel.values[method]).uniq! unless rel.values[method].nil?
       end
 
+      MULTI_KEY_METHODS.each do |method|
+        (@values[method]||={}).merge!(rel.values[method]) unless rel.values[method].nil?
+      end
+
       SINGLE_VALUE_METHODS.each do |method|
         @values[method] = rel.values[method] unless rel.values[method].nil?
       end
@@ -183,7 +199,11 @@ module Influxer
 
       def build_hash_where(hargs, negate = false)
         hargs.each do |key, val|
-          where_values << "(#{ build_eql(key,val,negate) })"
+          if @klass.fanout?(key)
+            build_fanout(key,val)
+          else
+            where_values << "(#{ build_eql(key,val,negate) })"
+          end
         end
       end
 
@@ -239,7 +259,7 @@ module Influxer
       end
 
       def quoted(val)
-        if val.is_a?(String)
+        if val.is_a?(String) or val.is_a?(Symbol)
           "'#{val}'"
         elsif val.kind_of?(Time) or val.kind_of?(DateTime)
           "#{val.to_i}s"

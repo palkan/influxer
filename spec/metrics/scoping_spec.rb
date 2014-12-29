@@ -7,9 +7,14 @@ describe Influxer::Metrics do
     end
   end
 
-  let(:dummy) do
+  let(:klass) do
     Class.new(Influxer::Metrics) do
       set_series 'dummy'
+    end
+  end
+
+  let(:dummy) do
+    Class.new(klass) do
       default_scope -> { time(:hour) }
     end
   end
@@ -30,6 +35,10 @@ describe Influxer::Metrics do
 
 
   describe "default scope" do
+    it "should work without default scope" do
+      expect(klass.all.to_sql).to eq "select * from \"dummy\""
+    end
+
     it "should work with default scope" do
       expect(dummy.all.to_sql).to eq "select * from \"dummy\" group by time(1h)"
     end

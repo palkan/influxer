@@ -1,4 +1,5 @@
 require 'influxer/metrics/scoping'
+require 'influxer/metrics/fanout'
 
 module Influxer
   class MetricsError < StandardError; end
@@ -10,6 +11,7 @@ module Influxer
     extend ActiveModel::Callbacks
 
     include Influxer::Scoping
+    include Influxer::Fanout
 
     define_model_callbacks :write
 

@@ -85,7 +85,7 @@ describe Influxer::Relation do
 
     describe "not" do
       it "should negate simple values" do
-        expect(rel.where.not(user_id: 1, dummy: 'a').to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy<>'a')"
+        expect(rel.where.not(user_id: 1, dummy: :a).to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy<>'a')"
       end
 
       it "should handle regexp" do

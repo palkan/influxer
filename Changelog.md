@@ -1,4 +1,4 @@
-## 0.1.0
+## 0.1.0-alpha
 - Add `time` method to Relation to group by time with constants (`:hour`, `:day`, etc) and fill support
 - Series names now properly quoted with double-quotes
 - Using regexps, ranges and arrays within `where` clause
