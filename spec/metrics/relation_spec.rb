@@ -47,16 +47,58 @@ describe Influxer::Relation do
           expect(rel.where("time > now() - 1d").to_sql).to eq "select * from \"dummy\" where (time > now() - 1d)" 
         end
 
-        xit "should recognize regexps as params" do
+        it "should handle regexps" do
           expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy=~/^du.*/)" 
         end
 
-        xit "should handle negation" do
-          expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id!=1) and (dummy!~/^du.*/)" 
+        it "should handle ranges" do
+          expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id>1 and user_id<4)" 
         end
 
-        xit "should handle arrays" do
-          expect(rel.where(user_id: [1,2,3]).to_sql).to eq "select * from \"dummy\" where ((user_id=1) or (user_id=2) or (user_id=3))" 
+        it "should handle arrays" do
+          expect(rel.where(user_id: [1,2,3]).to_sql).to eq "select * from \"dummy\" where (user_id=1 or user_id=2 or user_id=3)" 
+        end
+      end
+
+      describe "not" do
+        it "should negate simple values" do
+          expect(rel.where.not(user_id: 1, dummy: 'a').to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy<>'a')"
+        end
+
+        it "should handle regexp" do
+          expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy!~/^du.*/)" 
+        end
+
+        it "should handle ranges" do
+          expect(rel.where.not(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id<1 and user_id>4)" 
+        end
+
+        it "should handle arrays" do
+          expect(rel.where.not(user_id: [1,2,3]).to_sql).to eq "select * from \"dummy\" where (user_id<>1 and user_id<>2 and user_id<>3)" 
+        end
+      end
+
+      describe "past" do
+        it "should work with predefined symbols" do
+           expect(rel.past(:hour).to_sql).to eq "select * from \"dummy\" where (time > now() - 1h)"
+        end
+
+        it "should work with any symbols" do
+          expect(rel.past(:s).to_sql).to eq "select * from \"dummy\" where (time > now() - 1s)"
+        end
+
+        it "should work with strings" do
+          expect(rel.past("3d").to_sql).to eq "select * from \"dummy\" where (time > now() - 3d)"
+        end
+
+        it "should work with numbers" do
+           expect(rel.past(1.day).to_sql).to eq "select * from \"dummy\" where (time > now() - 86400s)"
+        end
+      end
+
+      describe "since" do
+        it "should work with datetime" do
+           expect(rel.since(Time.utc(2014,12,31)).to_sql).to eq "select * from \"dummy\" where (time > 1419984000s)"
         end
       end
 
