@@ -4,6 +4,7 @@ module Influxer
   require 'influxer/config'
   require 'influxer/client'
   require 'influxer/metrics/metrics'
+  require 'influxer/metrics/relation/time_group'
   require 'influxer/metrics/relation'
 
   module Model

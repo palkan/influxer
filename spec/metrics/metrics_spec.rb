@@ -86,9 +86,21 @@ describe Influxer::Metrics do
       end
     end
 
+    let(:dummy_metrics_2) do
+      Class.new(Influxer::Metrics) do
+        set_series "dummy \"A\""       
+      end
+    end
+
     let(:dummy_with_2_series) do
       Class.new(Influxer::Metrics) do
         set_series :events, :errors       
+      end
+    end
+
+    let(:dummy_with_2_series_quoted) do
+      Class.new(Influxer::Metrics) do
+        set_series "dummy \"A\"", "dummy \"B\""        
       end
     end
 
@@ -99,27 +111,32 @@ describe Influxer::Metrics do
       end
     end
 
-
-
     describe "set_series" do
       it "should set series name from class name by default" do
-        expect(DummyMetrics.series).to eq 'dummy'
+        expect(DummyMetrics.series).to eq "\"dummy\""
       end
 
       it "should set series from subclass" do
-        expect(dummy_metrics.series).to eq 'dummies'
+        expect(dummy_metrics.series).to eq "\"dummies\""
+      end
+
+      it "should set series with quetes" do
+        expect(dummy_metrics_2.series).to eq "\"dummy \\\"A\\\"\""
       end
 
       it "should set several series" do
-        expect(dummy_with_2_series.series).to eq 'events,errors'
+        expect(dummy_with_2_series.series).to eq "\"events\",\"errors\""
       end
 
+      it "should set several series with quotes" do
+        expect(dummy_with_2_series_quoted.series).to eq "\"dummy \\\"A\\\"\",\"dummy \\\"B\\\"\""
+      end
 
       it "should set series from proc" do
         expect(dummy_with_proc_series.series).to be_an_instance_of Proc
 
         m = dummy_with_proc_series.new user_id: 2, test_id:123
-        expect(dummy_with_proc_series.series.call(m)).to eq "test/123/user/2"
+        expect(m.series).to eq "\"test/123/user/2\""
       end
     end
 
