@@ -115,7 +115,17 @@ module Influxer
     end
 
     def delete_all
-      # todo:
+      sql = ["delete"]
+
+      sql << "from #{@instance.series}"
+
+      unless where_values.empty?
+        sql << "where #{where_values.join(" and ")}"
+      end
+
+      sql = sql.join " "
+
+      @instance.client.query sql
     end
 
     protected

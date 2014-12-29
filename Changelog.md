@@ -9,3 +9,4 @@
 - `where.not(...)` support
 - Add `past` and `since` methods
 - Add `merge` method and support for regexp series
+- Add `delete_all` support

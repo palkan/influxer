@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe Influxer::Relation do
+    before do
+      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|    
+        sql
+      end
+    end
+
     let(:rel) { Influxer::Relation.new DummyMetrics}
     let(:rel2) { Influxer::Relation.new DummyComplexMetrics}
     
@@ -167,6 +173,14 @@ describe Influxer::Relation do
       describe "limit" do
         it "should generate valid limi" do
           expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100" 
+        end
+      end
+    end
+
+    describe "delete_all" do
+      it do
+        Timecop.freeze(Time.now) do
+          expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).delete_all).to eq "delete from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)" 
         end
       end
     end
