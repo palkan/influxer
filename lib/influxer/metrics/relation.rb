@@ -1,10 +1,45 @@
 module Influxer
   class Relation
+    attr_reader :values
+
     include Influxer::TimeQuery
     
-    MULTI_VALUE_METHODS = [:select, :merge, :group, :where]
+    MULTI_VALUE_METHODS = [:select, :group, :where]
 
-    MULTI_VALUE_SIMPLE_METHODS = [:select, :merge, :group]
+    SINGLE_VALUE_METHODS = [:fill, :limit, :merge]
+
+    MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
+
+
+    MULTI_VALUE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}_values                   # def select_values
+          @values[:#{name}] ||= []           #   @values[:select] || []
+        end                                  # end
+      CODE
+    end
+
+    SINGLE_VALUE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}_value                     # def limit_value
+          @values[:#{name}]                   #   @values[:limit]
+        end                                   # end
+
+        def #{name}(val)                      # def limit(val)
+          @values[:#{name}] = val             #   @value[:limit] = val
+          self                                #   self
+        end                                   # end
+      CODE
+    end
+
+    MULTI_VALUE_SIMPLE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(*args)                   # def select(*args)
+          #{name}_values.concat args         #  select_values.concat args
+          self                               #  self
+        end                                  # end
+      CODE
+    end
 
     # Initialize new Relation for 'klass' (Class) metrics.
     # 
@@ -12,6 +47,7 @@ module Influxer
     #  :attributes - hash of attributes to be included to new Metrics object and where clause of Relation
     # 
     def initialize(klass, params = {})
+      @klass = klass
       @instance = klass.new params[:attributes]
       self.reset
       self.where(params[:attributes]) if params[:attributes].present?
@@ -31,23 +67,6 @@ module Influxer
       @instance
     end
 
-    MULTI_VALUE_METHODS.each do |name|
-      class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}_values                   # def select_values
-          @values[:#{name}] ||= []            #   @values[:select] || []
-        end                                  # end
-      CODE
-    end
-
-    MULTI_VALUE_SIMPLE_METHODS.each do |name|
-      class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}(*args)                   # def select(*args)
-          #{name}_values.concat args         #  select_values.concat args
-          self                               #  self
-        end                                  # end
-      CODE
-    end
-
     # accepts hash or strings conditions
     def where(*args,**hargs)
       build_where(args, hargs, false)
@@ -56,11 +75,6 @@ module Influxer
 
     def not(*args, **hargs)
       build_where(args, hargs, true)
-      self
-    end
-
-    def limit(val)
-      @values[:limit] = val
       self
     end
 
@@ -73,26 +87,26 @@ module Influxer
         sql << select_values.join(",")
       end 
 
-      sql << "from #{@instance.series}"
+      sql << "from #{ @instance.series }"
 
-      unless merge_values.empty?
-        sql << "merge #{@instance.quote_series(merge_values.first)}"
+      unless merge_value.nil?
+        sql << "merge #{ @instance.quote_series(merge_value) }"
       end
 
       unless group_values.empty?
-        sql << "group by #{group_values.join(",")}"
+        sql << "group by #{ group_values.join(",") }"
       end
 
-      unless @values[:fill].nil?
-        sql << "fill(#{@values[:fill]})"
+      unless fill_value.nil?
+        sql << "fill(#{ fill_value })"
       end
 
       unless where_values.empty?
-        sql << "where #{where_values.join(" and ")}"
+        sql << "where #{ where_values.join(" and ") }"
       end
 
-      unless @values[:limit].nil?
-        sql << "limit #{@values[:limit]}"
+      unless limit_value.nil?
+        sql << "limit #{ limit_value }"
       end
       sql.join " "
     end
@@ -126,6 +140,25 @@ module Influxer
       sql = sql.join " "
 
       @instance.client.query sql
+    end
+
+    def scoping
+      previous, @klass.current_scope = @klass.current_scope, self
+      yield
+    ensure
+      @klass.current_scope = previous
+    end
+
+    def merge!(rel)
+      MULTI_VALUE_METHODS.each do |method|
+        @values[method].concat(rel.values[method]).uniq! unless rel.values[method].nil? or @values[method].nil?
+      end
+
+      SINGLE_VALUE_METHODS.each do |method|
+        @values[method] = rel.values[method] unless rel.values[method].nil?
+      end
+
+      self
     end
 
     protected

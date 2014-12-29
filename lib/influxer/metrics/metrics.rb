@@ -7,10 +7,12 @@ module Influxer
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
 
+    include Influxer::Scoping
+
     define_model_callbacks :write
 
     class << self
-      delegate :select, :where, :group, :limit, :delete_all, to: :all
+      delegate :select, :where, :group, :merge, :time, :past, :since, :limit, :fill, :delete_all, to: :all
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -32,7 +34,7 @@ module Influxer
         if args.empty?
           matches = self.to_s.match(/^(.*)Metrics$/)
           if matches.nil?
-            @series = self.to_s.underscore
+            @series = self.superclass.respond_to?(:series) ? self.superclass.series : self.to_s.underscore
           else
             @series = matches[1].split("::").join("_").underscore
           end
@@ -48,7 +50,11 @@ module Influxer
       end
 
       def all
-        Relation.new self
+        if current_scope
+          current_scope.clone
+        else
+          default_scoped
+        end          
       end
     end
 

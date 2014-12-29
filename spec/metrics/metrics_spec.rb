@@ -21,7 +21,10 @@ describe Influxer::Metrics do
   
   specify { expect(metrics_class).to respond_to :all}
   specify { expect(metrics_class).to respond_to :where}
-  specify { expect(metrics_class).to respond_to :group}
+  specify { expect(metrics_class).to respond_to :merge}
+  specify { expect(metrics_class).to respond_to :time}
+  specify { expect(metrics_class).to respond_to :past}
+  specify { expect(metrics_class).to respond_to :since}
   specify { expect(metrics_class).to respond_to :limit}
   specify { expect(metrics_class).to respond_to :select}
   specify { expect(metrics_class).to respond_to :delete_all}

@@ -3,6 +3,8 @@ require 'influxer/version'
 module Influxer
   require 'influxer/config'
   require 'influxer/client'
+  require 'influxer/metrics/scoping'
+  require 'influxer/metrics/scoping/default'
   require 'influxer/metrics/metrics'
   require 'influxer/metrics/relation/time_query'
   require 'influxer/metrics/relation'
