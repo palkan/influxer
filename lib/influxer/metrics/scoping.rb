@@ -1,11 +1,16 @@
 require 'active_support/per_thread_registry'
+require 'influxer/metrics/scoping/default'
+require 'influxer/metrics/scoping/named'
 
 module Influxer
   module Scoping
     extend ActiveSupport::Concern
 
+    class Error < StandardError; end;
+
     included do
       include Default
+      include Named
     end
 
     module ClassMethods

@@ -20,6 +20,14 @@ describe Influxer::Metrics do
     end
   end
 
+  let(:doomy) do
+    Class.new(dappy) do
+      scope :by_user, -> (id) { where(user_id: id) if id.present? }
+      scope :hourly, -> { time(:hour) }
+      scope :daily, -> { time(:day) }
+    end
+  end
+
 
   describe "default scope" do
     it "should work with default scope" do
@@ -36,6 +44,16 @@ describe Influxer::Metrics do
   end
 
   describe "named scope" do
+    it "should work with named scope" do
+      expect(doomy.by_user(1).to_sql).to eq "select * from \"dummy\" group by time(1h) where (user_id=1) limit 100"
+    end
 
+    it "should work with named scope with empty relation" do
+      expect(doomy.by_user(nil).to_sql).to eq "select * from \"dummy\" group by time(1h) limit 100"
+    end
+
+    it "should work with several scopes" do
+      expect(doomy.where(dummy_id: 100).by_user([1,2,3]).daily.to_sql).to eq "select * from \"dummy\" group by time(1d) where (dummy_id=100) and (user_id=1 or user_id=2 or user_id=3) limit 100"
+    end
   end
 end

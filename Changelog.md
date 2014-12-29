@@ -7,5 +7,5 @@
 - Add `merge` method and support for regexp series
 - Add `delete_all` support
 - Add cache support (using `Rails.cache`)
-- Scopes
+- Scopes (default and named)
 - Support for fanout series

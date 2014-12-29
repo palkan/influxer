@@ -1,3 +1,5 @@
+require 'influxer/metrics/scoping'
+
 module Influxer
   class MetricsError < StandardError; end
   class MetricsInvalid < MetricsError; end

@@ -23,9 +23,9 @@ module Influxer
 
     def time(val, options={})
       if val.is_a?(Symbol)
-        group("time(#{ TIME_ALIASES[val] || ('1'+val.to_s)  })")
+        @values[:time] = TIME_ALIASES[val] || '1'+val.to_s
       else
-        group("time(#{val})")
+        @values[:time] = val
       end
 
       unless options[:fill].nil?

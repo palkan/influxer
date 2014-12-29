@@ -1,43 +1,50 @@
+require 'influxer/metrics/relation/time_query'
+
 module Influxer
   class Relation
     attr_reader :values
 
     include Influxer::TimeQuery
     
-    MULTI_VALUE_METHODS = [:select, :group, :where]
+    MULTI_VALUE_METHODS = [:select, :where, :group]
 
-    SINGLE_VALUE_METHODS = [:fill, :limit, :merge]
+    SINGLE_VALUE_METHODS = [:fill, :limit, :merge, :time]
 
     MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
 
+    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :merge]
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}_values                   # def select_values
-          @values[:#{name}] ||= []           #   @values[:select] || []
-        end                                  # end
+        def #{name}_values                          # def select_values
+          @values[:#{name}] ||= []                  #   @values[:select] || []
+        end                                         # end
       CODE
     end
 
     SINGLE_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}_value                     # def limit_value
-          @values[:#{name}]                   #   @values[:limit]
-        end                                   # end
+        def #{name}_value                           # def limit_value
+          @values[:#{name}]                         #   @values[:limit]
+        end                                         # end
+      CODE
+    end
 
-        def #{name}(val)                      # def limit(val)
-          @values[:#{name}] = val             #   @value[:limit] = val
-          self                                #   self
-        end                                   # end
+    SINGLE_VALUE_SIMPLE_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(val)                            # def limit(val)
+          @values[:#{name}] = val                   #   @value[:limit] = val
+          self                                      #   self
+        end                                         # end
       CODE
     end
 
     MULTI_VALUE_SIMPLE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}(*args)                   # def select(*args)
-          #{name}_values.concat args         #  select_values.concat args
-          self                               #  self
-        end                                  # end
+        def #{name}(*args)                          # def select(*args)
+          #{name}_values.concat args.map(&:to_s)    #  select_values.concat args.map(&:to_s)
+          self                                      #  self
+        end                                         # end
       CODE
     end
 
@@ -84,7 +91,7 @@ module Influxer
       if select_values.empty?
         sql << "*"
       else
-        sql << select_values.join(",")
+        sql << select_values.uniq.join(",")
       end 
 
       sql << "from #{ @instance.series }"
@@ -93,8 +100,8 @@ module Influxer
         sql << "merge #{ @instance.quote_series(merge_value) }"
       end
 
-      unless group_values.empty?
-        sql << "group by #{ group_values.join(",") }"
+      unless group_values.empty? and time_value.nil?
+        sql << "group by #{ (time_value.nil? ? [] : ['time('+@values[:time]+')']).concat(group_values).uniq.join(",") }"
       end
 
       unless fill_value.nil?
@@ -150,8 +157,9 @@ module Influxer
     end
 
     def merge!(rel)
+      return self if rel.nil?
       MULTI_VALUE_METHODS.each do |method|
-        @values[method].concat(rel.values[method]).uniq! unless rel.values[method].nil? or @values[method].nil?
+        (@values[method]||=[]).concat(rel.values[method]).uniq! unless rel.values[method].nil?
       end
 
       SINGLE_VALUE_METHODS.each do |method|
@@ -237,6 +245,12 @@ module Influxer
           "#{val.to_i}s"
         else
           val.to_s
+        end
+      end
+
+      def method_missing(method, *args, &block)
+        if @klass.respond_to?(method)    
+          merge!(scoping { @klass.public_send(method, *args, &block) })
         end
       end
   end
