@@ -13,11 +13,22 @@ module Influxer
         end
 
         data = self.query(sql)
-        Rails.cache.write(sql, data, Influxer.config.cache)
+        Rails.cache.write(sql, data, cache_options(sql))
         data
       else
         self.query(sql)
       end
     end
   end
+
+
+  private
+    def cache_options(sql=nil)
+      options = Influxer.config.cache.dup
+      # if sql contains 'now()' set expires to 1 minute or :cache_now_for value of config.cache if defined
+      if sql =~ /\snow\(\)/
+        options[:expires_in] = options[:cache_now_for] || 60
+      end
+      options
+    end
 end
