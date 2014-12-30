@@ -8,7 +8,7 @@ module Influxer
 
     def cached_query(sql)
       unless Influxer.config.cache == false
-        if Rails.cache.exists?(sql)
+        if Rails.cache.exist?(sql)
           return Rails.cache.read(sql)
         end
 
