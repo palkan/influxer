@@ -209,17 +209,17 @@ describe Influxer::Relation do
     end
     
     it "should return correct String represantation of empty relation" do
-      Influxer.client.stub(:query) { [] }
+      Influxer.client.stub(:query) { {} }
       expect(rel.inspect).to eq "#<Influxer::Relation []>"  
     end
 
     it "should return correct String represantation of non-empty relation" do
-      Influxer.client.stub(:query){ [1,2,3] }
+      Influxer.client.stub(:query){ {"dummy" => [1,2,3]} }
       expect(rel.inspect).to eq "#<Influxer::Relation [1, 2, 3]>"  
     end
 
      it "should return correct String represantation of non-empty large (>11) relation" do
-      Influxer.client.stub(:query){ [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
+      Influxer.client.stub(:query){ {"dummy" => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]} } 
       expect(rel.inspect).to eq "#<Influxer::Relation [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...]>"  
     end
   end 

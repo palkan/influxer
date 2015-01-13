@@ -143,11 +143,11 @@ describe Influxer::Metrics do
       end
 
       it "should set several series" do
-        expect(dummy_with_2_series.new.series).to eq "\"events\",\"errors\""
+        expect(dummy_with_2_series.new.series).to eq "merge(\"events\",\"errors\")"
       end
 
       it "should set several series with quotes" do
-        expect(dummy_with_2_series_quoted.new.series).to eq "\"dummy \\\"A\\\"\",\"dummy \\\"B\\\"\""
+        expect(dummy_with_2_series_quoted.new.series).to eq "merge(\"dummy \\\"A\\\"\",\"dummy \\\"B\\\"\")"
       end
 
       it "should set series from proc" do

@@ -21,7 +21,7 @@ module Influxer
           end
         end  
         if @values[:fanout_rxp] == true
-          "/^#{ fan_parts.join( @klass.fanout_options[:delimeter] ) }$/"
+          "merge(/^#{ fan_parts.join( @klass.fanout_options[:delimeter] ) }$/)"
         else
           @instance.quote_series(fan_parts.join(@klass.fanout_options[:delimeter]))
         end

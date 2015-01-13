@@ -107,7 +107,11 @@ module Influxer
       when Proc
         quote_series(self.class.series.call(self))
       when Array
-        val.map{ |s| quote_series(s) }.join(',')
+        if val.length > 1
+          "merge(#{ val.map{ |s| quote_series(s) }.join(',') })"
+        else
+          quote_series(val.first)
+        end
       else
         '"'+val.to_s.gsub(/\"/){ %q{\"} }+'"'  
       end

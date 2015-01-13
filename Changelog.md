@@ -1,3 +1,7 @@
+## 0.1.0-rc
+- Fix `Relation#to_a` (now returns array of points correctrly)
+- Fix fanout queries with array args (now use `merge(Regexp)`)
+
 ## 0.1.0-alpha
 - Add `time` method to Relation to group by time with constants (`:hour`, `:day`, etc) and fill support
 - Series names now properly quoted with double-quotes

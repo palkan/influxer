@@ -237,7 +237,7 @@ module Influxer
       end
 
       def load
-        @records = @instance.client.cached_query to_sql
+        @records = get_points(@instance.client.cached_query(to_sql))
         @loaded = true
       end
 
@@ -272,6 +272,10 @@ module Influxer
         if @klass.respond_to?(method)    
           merge!(scoping { @klass.public_send(method, *args, &block) })
         end
+      end
+
+      def get_points(hash)
+        hash.values.reduce([],:+)
       end
   end
 end 

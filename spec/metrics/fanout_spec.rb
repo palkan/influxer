@@ -40,7 +40,7 @@ describe Influxer::Metrics do
     end
 
     it "should work with regexp fanouts" do
-      expect(dappy.where(dummy_id: 100).by_user(/[1-3]/).daily.to_sql).to eq "select * from /^dummy_by_day_user_[1-3]$/ where (dummy_id=100)"
+      expect(dappy.where(dummy_id: 100).by_user(/[1-3]/).daily.to_sql).to eq "select * from merge(/^dummy_by_day_user_[1-3]$/) where (dummy_id=100)"
     end
   end
 end
