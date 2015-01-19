@@ -24,7 +24,7 @@ module Influxer
 
         _start = Time.now
         res = yield
-        _duration = Time.now - _start
+        _duration = (Time.now - _start)*1000
         
         name  = "InfluxDB SQL (#{_duration.round(1)}ms)"
 

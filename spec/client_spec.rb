@@ -17,7 +17,7 @@ describe Influxer::Client do
 
   describe "cache" do
     before do
-      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|    
+      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|   
         sql
       end
     end
