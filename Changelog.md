@@ -1,3 +1,7 @@
+## 0.1.0
+- Add logs
+- Add `foreign_key` param to `has_metrics` options
+
 ## 0.1.0-rc
 - Fix `Relation#to_a` (now returns array of points correctrly)
 - Fix fanout queries with array args (now use `merge(Regexp)`)

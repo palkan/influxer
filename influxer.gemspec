@@ -1,16 +1,14 @@
 $:.push File.expand_path("../lib", __FILE__)
 
-# Maintain your gem's version:
 require "influxer/version"
 
-# Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "influxer"
   s.version     = Influxer::VERSION
   s.authors     = ["Vlad Dem"]
   s.email       = ["dementiev.vm@gmail.com"]
   s.homepage    = "http://github.com/palkan/influxer"
-  s.summary     = "InfluxDB support for Rails"
+  s.summary     = "InfluxDB for Rails"
   s.description = "InfluxDB the Rails way"
   s.license     = "MIT"
 

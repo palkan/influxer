@@ -17,8 +17,10 @@ module Influxer
           attrs = params[:inherits]
         end
 
+        _foreign_key = params.key?(:foreign_key) ? params[:foreign_key] : self.to_s.foreign_key
+
         define_method(metrics_name) do
-          rel_attrs = {self.class.to_s.foreign_key => self.id}
+          rel_attrs = _foreign_key ? {_foreign_key => self.id} : {}
           
           unless attrs.nil?
             attrs.each do |key|
