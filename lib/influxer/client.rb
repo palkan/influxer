@@ -18,12 +18,20 @@ module Influxer
     end
     
     private
-      def log(sql, name = "InfluxDB SQL")
-        @instrumenter.instrument(
-          "sql.influxdb",
-          :sql            => sql,
-          :name           => name
-        ) { yield }
+
+      def log(sql)
+        return yield unless logger.debug?
+
+        _start = Time.now
+        res = yield
+        _duration = Time.now - _start
+        
+        name  = "InfluxDB SQL (#{_duration.round(1)}ms)"
+
+        # bold black name and blue query string
+        msg = "\e[1m\e[30m#{name}\e[0m  \e[34m#{sql}\e[0m"
+        logger.debug msg
+        res
       end
 
       def cache_options(sql=nil)
@@ -38,6 +46,10 @@ module Influxer
       # add prefix; remove whitespaces
       def normalized_cache_key(sql)
         "influxer:#{sql.gsub(/\s*/, '')}"
+      end
+
+      def logger
+        Rails.logger
       end
   end
 end

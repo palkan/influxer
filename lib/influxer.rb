@@ -10,7 +10,6 @@ module Influxer
     require 'influxer/model'
   end
 
-  require 'influxer/log_subscriber'
   require 'influxer/engine'
 
   def self.config
