@@ -62,16 +62,15 @@ describe Influxer::Metrics do
       end 
 
       it "should write successfully when all required attributes are set" do
-        expect(dummy_metrics.write).to be true
-        expect(dummy_metrics.persisted?).to be true
+        expect(dummy_metrics.write).to be_truthy
+        expect(dummy_metrics.persisted?).to be_truthy
       end 
 
       it "should raise error if you want to write twice" do
-        expect(dummy_metrics.write).to be true
+        expect(dummy_metrics.write).to be_truthy
         expect{dummy_metrics.write!}.to raise_error(StandardError)
       end 
     end
-
 
     describe "active_model callbacks on write" do
       it "should work" do
@@ -156,6 +155,19 @@ describe Influxer::Metrics do
         m = dummy_with_proc_series.new user_id: 2, test_id:123
         expect(m.series).to eq "\"test/123/user/2\""
       end
+    end
+
+    describe "write method" do
+      it "should write data and return point" do
+        point = DummyMetrics.write(user_id: 1, dummy_id: 2)
+        expect(point.persisted?).to be_truthy
+        expect(point.user_id).to eq 1
+        expect(point.dummy_id).to eq 2
+      end 
+
+      it "should not write data and return false" do
+        expect(DummyMetrics.write(dummy_id: 2)).to be false
+      end 
     end
 
     describe "all method" do

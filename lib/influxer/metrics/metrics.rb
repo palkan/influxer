@@ -16,7 +16,7 @@ module Influxer
     define_model_callbacks :write
 
     class << self
-      delegate :select, :where, :group, :merge, :time, :past, :since, :limit, :fill, :delete_all, to: :all
+      delegate :write, :select, :where, :group, :merge, :time, :past, :since, :limit, :fill, :delete_all, to: :all
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -76,6 +76,7 @@ module Influxer
       run_callbacks :write do
         self.write_point
       end
+      self
     end
 
     def write!
