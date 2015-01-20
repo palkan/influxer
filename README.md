@@ -2,7 +2,7 @@
 
 ## Influxer
 
-ActiveRecord-like wrapper for [influxdb-ruby](https://github.com/influxdb/influxdb-ruby) with many useful features, such as:
+Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://influxdb.com/) with many useful features, such as:
 - Familar query language (use `select`, `where`, `not`, `group` etc).
 - Support for Regex conditions: `where(page_id: /^home\/.*/) #=> select * ... where page_id=~/^home\/.*/`.
 - Special query methods for InfluxDB: 
@@ -11,7 +11,7 @@ ActiveRecord-like wrapper for [influxdb-ruby](https://github.com/influxdb/influx
     - `since` - get only points since date (e.g. `Metrics.since(Time.utc(2014,12,31)) => # select * ... where time > 1419984000s`);
     - `merge` - merge series.
 - Scopes support
-    ```
+    ```ruby
     class Metrics < Influxer::Metrics
         default_scope -> { time(:hour).limit(1000) }
         scope :unlimited, -> { limit(nil) }
@@ -26,7 +26,7 @@ ActiveRecord-like wrapper for [influxdb-ruby](https://github.com/influxdb/influx
 
     ```
 - Support for handling fanout series as one metrics.
-    ```
+    ```ruby
     class Metrics < Influxer::Metrics
         fanout :account, :user, :page
     end
@@ -43,7 +43,7 @@ ActiveRecord-like wrapper for [influxdb-ruby](https://github.com/influxdb/influx
 
     ``` 
 - Integrate with your model:
-    ```
+    ```ruby
     class UserVisits < Influxer::Metrics
     end
     
@@ -58,3 +58,5 @@ ActiveRecord-like wrapper for [influxdb-ruby](https://github.com/influxdb/influx
     user.visits.where(page_id: 'home')
     #=> select * from user_visits where page_id='home'
     ```
+    
+Find more on [Wiki](/palkan/influxer/wiki).
