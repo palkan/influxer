@@ -1,3 +1,6 @@
+## 0.1.1
+- Add [anyway_config](https://github.com/palkan/anyway_config)
+
 ## 0.1.0
 - Add logs
 - Add `foreign_key` param to `has_metrics` options
