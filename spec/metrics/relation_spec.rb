@@ -192,6 +192,21 @@ describe Influxer::Relation do
         expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100" 
       end
     end
+
+    describe "empty?" do
+      after(:each) { Influxer.reset }
+      it "should return false if has points" do
+        Influxer.client.stub(:query) { {points: [{time: 1, id: 2}]} }
+        expect(rel.empty?).to be_falsey
+        expect(rel.present?).to be_truthy
+      end
+
+      it "should return true if no points" do
+        Influxer.client.stub(:query) { {} }
+        expect(rel.empty?).to be_truthy
+        expect(rel.present?).to be_falsey
+      end
+    end
   end
 
   describe "delete_all" do

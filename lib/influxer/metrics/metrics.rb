@@ -16,6 +16,7 @@ module Influxer
     define_model_callbacks :write
 
     class << self
+      # delegate query functions to all
       delegate :write, :select, :where, :group, :merge, :time, :past, :since, :limit, :fill, :delete_all, to: :all
 
       def attributes(*attrs)

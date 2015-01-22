@@ -60,6 +60,12 @@ module Influxer
       CODE
     end
 
+
+    class << self
+      # delegate array methods to to_a
+      delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join, to: :to_a
+    end
+
     # Initialize new Relation for 'klass' (Class) metrics.
     # 
     # Available params:
@@ -133,7 +139,6 @@ module Influxer
     def to_a
       return @records if loaded?
       load
-      @records
     end
 
     def inspect
@@ -143,8 +148,23 @@ module Influxer
       "#<#{self.class.name} [#{entries.join(', ')}]>"
     end
 
-    def as_json
-      to_a.as_json
+    def empty?
+      unless loaded?
+        # we don't need selects here
+        select_values.clear
+        limit(1).load
+      end
+      return @records.empty? 
+    end
+
+    def as_json(options=nil)
+      to_a.as_json(options)
+    end
+
+    def load
+      @records = get_points(@instance.client.cached_query(to_sql))
+      @loaded = true
+      @records
     end
 
     def delete_all
@@ -184,6 +204,7 @@ module Influxer
 
       self
     end
+
 
     protected
       def build_where(args, hargs, negate)
@@ -234,11 +255,6 @@ module Influxer
         else
           "#{key}<#{quoted(val.begin)} and #{key}>#{quoted(val.end)}"
         end  
-      end
-
-      def load
-        @records = get_points(@instance.client.cached_query(to_sql))
-        @loaded = true
       end
 
       def loaded?

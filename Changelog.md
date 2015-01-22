@@ -1,5 +1,6 @@
 ## 0.1.1
 - Add [anyway_config](https://github.com/palkan/anyway_config)
+- Add `empty?` method
 
 ## 0.1.0
 - Add logs
