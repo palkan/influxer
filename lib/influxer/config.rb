@@ -23,10 +23,7 @@ module Influxer
       super
       # we want pass @cache value as options to cache store, so we want it to be a Hash
       if @cache == true
-        @cache = {}
-      elsif @cache != false
-        # cache keys should be symbols to work as Rails.cache options
-        @cache.symbolize_keys!
+        @cache = {}.with_indifferent_access
       end
     end
   end
