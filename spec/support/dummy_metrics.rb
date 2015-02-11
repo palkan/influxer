@@ -4,4 +4,6 @@ class DummyMetrics < Influxer::Metrics
   validates_presence_of :dummy_id, :user_id
 
   before_write ->{ self.time = DateTime.now }
+
+  scope :calc, ->(method, *args) { send(method, *args) }
 end

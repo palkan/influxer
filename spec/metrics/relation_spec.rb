@@ -25,7 +25,7 @@ describe Influxer::Relation do
   specify { expect(rel).to respond_to :to_sql }
 
 
-  describe "merge relations" do
+  describe "#merge!" do
     it "should merge multi values" do
       r1 = rel.where(id: [1,2], dummy: 'qwe').time(:hour)
       r2 = Influxer::Relation.new(DummyMetrics).where.not(user_id: 0).group(:user_id)
@@ -49,7 +49,7 @@ describe Influxer::Relation do
       end
     end
 
-    describe "select" do
+    describe "#select" do
       it "should select array of symbols" do
         expect(rel.select(:user_id, :dummy_id).to_sql).to eq "select user_id,dummy_id from \"dummy\"" 
       end
@@ -59,7 +59,7 @@ describe Influxer::Relation do
       end
     end
 
-    describe "where" do
+    describe "#where" do
       it "should generate valid conditions from hash" do
         Timecop.freeze(Time.now) do
           expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)" 
@@ -83,7 +83,7 @@ describe Influxer::Relation do
       end
     end
 
-    describe "not" do
+    describe "#not" do
       it "should negate simple values" do
         expect(rel.where.not(user_id: 1, dummy: :a).to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy<>'a')"
       end
@@ -101,7 +101,7 @@ describe Influxer::Relation do
       end
     end
 
-    describe "merge" do
+    describe "#merge" do
       it "should merge with one series" do
         expect(rel.merge("dubby").to_sql).to eq "select * from \"dummy\" merge \"dubby\""
       end
@@ -111,7 +111,7 @@ describe Influxer::Relation do
       end
     end
 
-    describe "past" do
+    describe "#past" do
       it "should work with predefined symbols" do
          expect(rel.past(:hour).to_sql).to eq "select * from \"dummy\" where (time > now() - 1h)"
       end
@@ -129,18 +129,18 @@ describe Influxer::Relation do
       end
     end
 
-    describe "since" do
+    describe "#since" do
       it "should work with datetime" do
          expect(rel.since(Time.utc(2014,12,31)).to_sql).to eq "select * from \"dummy\" where (time > 1419984000s)"
       end
     end
 
-    describe "group" do
+    describe "#group" do
       it "should generate valid groups" do
         expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from \"dummy\" group by user_id,time(1m) fill(0)" 
       end
 
-      describe "group by time predefined values" do
+      context "group by time predefined values" do
         it "should group by hour" do
           expect(rel.time(:hour).to_sql).to eq "select * from \"dummy\" group by time(1h)"
         end
@@ -187,29 +187,53 @@ describe Influxer::Relation do
       end
     end
 
-    describe "limit" do
+    describe "#limit" do
       it "should generate valid limi" do
         expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100" 
       end
     end
 
-    describe "empty?" do
-      after(:each) { Influxer.reset }
-      it "should return false if has points" do
-        Influxer.client.stub(:query) { {points: [{time: 1, id: 2}]} }
-        expect(rel.empty?).to be_falsey
-        expect(rel.present?).to be_truthy
+    describe "calculations" do
+      context "one arg calculation methods" do
+        [
+          :count, :min, :max, :mean, 
+          :mode, :median, :distinct, :derivative, 
+          :stddev, :sum, :first, :last, :difference, :histogram
+        ].each do |method|
+          describe "##{method}" do
+            it { expect(rel.where(user_id: 1).calc(method, :column_name).to_sql).to eq "select #{method}(column_name) from \"dummy\" where (user_id=1)"}
+          end
+        end
       end
 
-      it "should return true if no points" do
-        Influxer.client.stub(:query) { {} }
-        expect(rel.empty?).to be_truthy
-        expect(rel.present?).to be_falsey
+      context "two args calculation methods" do
+        [
+          :percentile, :histogram, :top, :bottom 
+        ].each do |method|
+          describe "##{method}" do
+            it { expect(rel.where(user_id: 1).calc(method, :column_name, 10).to_sql).to eq "select #{method}(column_name,10) from \"dummy\" where (user_id=1)"}
+          end
+        end
       end
     end
   end
 
-  describe "delete_all" do
+  describe "#empty?" do
+    after(:each) { Influxer.reset }
+    it "should return false if has points" do
+      Influxer.client.stub(:query) { {points: [{time: 1, id: 2}]} }
+      expect(rel.empty?).to be_falsey
+      expect(rel.present?).to be_truthy
+    end
+
+    it "should return true if no points" do
+      Influxer.client.stub(:query) { {} }
+      expect(rel.empty?).to be_truthy
+      expect(rel.present?).to be_falsey
+    end
+  end
+
+  describe "#delete_all" do
     it do
       Timecop.freeze(Time.now) do
         expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).delete_all).to eq "delete from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)" 
@@ -217,7 +241,7 @@ describe Influxer::Relation do
     end
   end
 
-  describe "inspect" do
+  describe "#inspect" do
 
     after(:each) do
       Influxer.reset

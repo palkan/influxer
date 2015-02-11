@@ -1,3 +1,4 @@
+require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
 require 'influxer/metrics/fanout'
 
@@ -17,7 +18,13 @@ module Influxer
 
     class << self
       # delegate query functions to all
-      delegate :write, :select, :where, :group, :merge, :time, :past, :since, :limit, :fill, :delete_all, to: :all
+      delegate *(
+        [
+          :write, :select, :where, :group, 
+          :merge, :time, :past, :since, :limit, 
+          :fill, :delete_all
+        ]+Influxer::Calculations::CALCULATION_METHODS), 
+      to: :all
 
       def attributes(*attrs)
         attrs.each do |name|

@@ -1,5 +1,6 @@
 require 'influxer/metrics/relation/time_query'
 require 'influxer/metrics/relation/fanout_query'
+require 'influxer/metrics/relation/calculations'
 
 module Influxer
   class Relation
@@ -7,6 +8,7 @@ module Influxer
 
     include Influxer::TimeQuery
     include Influxer::FanoutQuery
+    include Influxer::Calculations
     
     MULTI_VALUE_METHODS = [:select, :where, :group]
 
