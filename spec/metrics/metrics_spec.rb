@@ -69,7 +69,7 @@ describe Influxer::Metrics do
       end 
 
       it "should write successfully when all required attributes are set" do
-        expect(Influxer.client).to receive(:write_point).with("\"dummy\"", anything)
+        expect(Influxer.client).to receive(:write_point).with("dummy", anything)
         expect(dummy_metrics.write).to be_truthy
         expect(dummy_metrics.persisted?).to be_truthy
       end 
@@ -161,7 +161,7 @@ describe Influxer::Metrics do
 
     describe "write method" do
       it "should write data and return point" do
-        expect(Influxer.client).to receive(:write_point).with("\"dummies\"", {user_id: 1, dummy_id: 2})
+        expect(Influxer.client).to receive(:write_point).with("dummies", {user_id: 1, dummy_id: 2})
         
         point = dummy_metrics.write(user_id: 1, dummy_id: 2)
         expect(point.persisted?).to be_truthy

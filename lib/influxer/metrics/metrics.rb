@@ -82,7 +82,7 @@ module Influxer
       return false if self.invalid?
 
       run_callbacks :write do
-        self.write_point
+        write_point
       end
       self
     end
@@ -93,7 +93,7 @@ module Influxer
     end
 
     def write_point
-      client.write_point series, @attributes
+      client.write_point unquote(series), @attributes
       @persisted = true
     end 
 
@@ -108,6 +108,10 @@ module Influxer
     def client
       Influxer.client
     end
+
+
+    attributes :time
+  
 
     def quote_series(val)
       case val
@@ -126,7 +130,11 @@ module Influxer
       end
     end
 
-    attributes :time
-  
+    private
+
+    def unquote(name)
+      name.gsub(/(\A['"]|['"]\z)/,'')
+    end
+
   end
 end 
