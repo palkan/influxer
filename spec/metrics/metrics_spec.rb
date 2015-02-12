@@ -49,36 +49,37 @@ describe Influxer::Metrics do
 
     let(:dummy_metrics) { DummyMetrics.new dummy_id: 1, user_id: 1}
 
-    describe "write method" do
+    describe "#write" do
 
-      it "should not write if required attribute is missing" do
-        m = DummyMetrics.new(dummy_id: 1)
-        expect(m.write).to be false
-        expect(m.errors.size).to eq(1)
-      end 
+      context "Validations" do
+        it "should not write if required attribute is missing" do
+          m = DummyMetrics.new(dummy_id: 1)
+          expect(m.write).to be false
+          expect(m.errors.size).to eq(1)
+        end 
 
-      it "should raise error if required attribute is missing" do
-        expect{DummyMetrics.new(user_id: 1).write!}.to raise_error(StandardError)    
+        it "should raise error if required attribute is missing" do
+          expect{DummyMetrics.new(user_id: 1).write!}.to raise_error(StandardError)    
+        end 
+
+        it "should raise error if you want to write twice" do
+          expect(dummy_metrics.write).to be_truthy
+          expect{dummy_metrics.write!}.to raise_error(StandardError)
+        end
       end 
 
       it "should write successfully when all required attributes are set" do
+        expect(Influxer.client).to receive(:write_point).with("\"dummy\"", anything)
         expect(dummy_metrics.write).to be_truthy
         expect(dummy_metrics.persisted?).to be_truthy
       end 
-
-      it "should raise error if you want to write twice" do
-        expect(dummy_metrics.write).to be_truthy
-        expect{dummy_metrics.write!}.to raise_error(StandardError)
-      end 
     end
 
-    describe "active_model callbacks on write" do
-      it "should work" do
-
+    context "active_model callbacks" do
+      it "should set current time" do
         Timecop.freeze(Time.local(2014,10,10,10,10,10)) do
           dummy_metrics.write!
         end
-
         expect(dummy_metrics.time).to eq Time.local(2014,10,10,10,10,10)
       end
     end
@@ -89,7 +90,8 @@ describe Influxer::Metrics do
 
     let(:dummy_metrics) do
       Class.new(Influxer::Metrics) do
-        set_series :dummies        
+        set_series :dummies       
+        attributes :user_id, :dummy_id 
       end
     end
 
@@ -159,7 +161,9 @@ describe Influxer::Metrics do
 
     describe "write method" do
       it "should write data and return point" do
-        point = DummyMetrics.write(user_id: 1, dummy_id: 2)
+        expect(Influxer.client).to receive(:write_point).with("\"dummies\"", {user_id: 1, dummy_id: 2})
+        
+        point = dummy_metrics.write(user_id: 1, dummy_id: 2)
         expect(point.persisted?).to be_truthy
         expect(point.user_id).to eq 1
         expect(point.dummy_id).to eq 2
