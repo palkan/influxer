@@ -1,11 +1,12 @@
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
 require 'influxer/metrics/fanout'
+require 'active_model'
 
 module Influxer
   class MetricsError < StandardError; end
   class MetricsInvalid < MetricsError; end
-  
+
   class Metrics
     include ActiveModel::Model
     include ActiveModel::Validations
@@ -20,10 +21,10 @@ module Influxer
       # delegate query functions to all
       delegate *(
         [
-          :write, :select, :where, :group, 
-          :merge, :time, :past, :since, :limit, 
+          :write, :select, :where, :group,
+          :merge, :time, :past, :since, :limit,
           :fill, :delete_all
-        ]+Influxer::Calculations::CALCULATION_METHODS), 
+        ]+Influxer::Calculations::CALCULATION_METHODS),
       to: :all
 
       def attributes(*attrs)
@@ -41,7 +42,7 @@ module Influxer
       def inherited(subclass)
         subclass.set_series
       end
-    
+
       def set_series(*args)
         if args.empty?
           matches = self.to_s.match(/^(.*)Metrics$/)
@@ -66,7 +67,7 @@ module Influxer
           current_scope.clone
         else
           default_scoped
-        end          
+        end
       end
     end
 
@@ -95,7 +96,7 @@ module Influxer
     def write_point
       client.write_point unquote(series), @attributes
       @persisted = true
-    end 
+    end
 
     def persisted?
       @persisted
@@ -111,7 +112,7 @@ module Influxer
 
 
     attributes :time
-  
+
 
     def quote_series(val)
       case val
@@ -126,7 +127,7 @@ module Influxer
           quote_series(val.first)
         end
       else
-        '"'+val.to_s.gsub(/\"/){ %q{\"} }+'"'  
+        '"'+val.to_s.gsub(/\"/){ %q{\"} }+'"'
       end
     end
 
@@ -137,4 +138,4 @@ module Influxer
     end
 
   end
-end 
+end
