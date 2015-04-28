@@ -43,7 +43,7 @@ module Influxer
     # Extract fanout values from series name
     def extract_values(name)
       data = @klass.fanout_rxp.match(name)
-      Hash[data.names.zip(data.captures)].compact
+      Hash[data.names.zip(data.captures)].delete_if { |_k, v| v.nil? }
     end
   end
 end
