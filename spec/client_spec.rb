@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Influxer::Client do
-
   after(:each) do
     Rails.cache.clear
   end
@@ -17,7 +16,7 @@ describe Influxer::Client do
 
   describe "cache" do
     before do
-      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|   
+      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|
         sql
       end
     end
@@ -36,11 +35,11 @@ describe Influxer::Client do
     end
 
     it "should write data to cache with expiration" do
-      conf.cache = {expires_in: 1}
+      conf.cache = { expires_in: 1 }
 
       client.cached_query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
-      
+
       sleep 2
       expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
     end

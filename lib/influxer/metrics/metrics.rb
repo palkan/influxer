@@ -7,6 +7,7 @@ module Influxer
   class MetricsError < StandardError; end
   class MetricsInvalid < MetricsError; end
 
+  # Base class for InfluxDB querying and writing
   class Metrics
     include ActiveModel::Model
     include ActiveModel::Validations
@@ -19,13 +20,18 @@ module Influxer
 
     class << self
       # delegate query functions to all
-      delegate *(
-        [
-          :write, :select, :where, :group,
-          :merge, :time, :past, :since, :limit,
-          :fill, :delete_all
-        ]+Influxer::Calculations::CALCULATION_METHODS),
-      to: :all
+      delegate(
+        *(
+          [
+            :write, :select, :where, :group,
+            :merge, :time, :past, :since, :limit,
+            :fill, :delete_all
+          ] + Influxer::Calculations::CALCULATION_METHODS
+        ),
+        to: :all
+      )
+
+      attr_reader :series
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -45,9 +51,9 @@ module Influxer
 
       def set_series(*args)
         if args.empty?
-          matches = self.to_s.match(/^(.*)Metrics$/)
+          matches = to_s.match(/^(.*)Metrics$/)
           if matches.nil?
-            @series = self.superclass.respond_to?(:series) ? self.superclass.series : self.to_s.underscore
+            @series = superclass.respond_to?(:series) ? superclass.series : to_s.underscore
           else
             @series = matches[1].split("::").join("_").underscore
           end
@@ -58,15 +64,28 @@ module Influxer
         end
       end
 
-      def series
-        @series
-      end
-
       def all
         if current_scope
           current_scope.clone
         else
           default_scoped
+        end
+      end
+
+      def quoted_series(val = @series, instance = nil)
+        case val
+        when Regexp
+          val.inspect
+        when Proc
+          quoted_series(val.call(instance))
+        when Array
+          if val.length > 1
+            "merge(#{ val.map { |s| quoted_series(s) }.join(',') })"
+          else
+            quoted_series(val.first)
+          end
+        else
+          '"' + val.to_s.gsub(/\"/) { %q(\") } + '"'
         end
       end
     end
@@ -78,7 +97,7 @@ module Influxer
     end
 
     def write
-      raise MetricsError.new('Cannot write the same metrics twice') if self.persisted?
+      fail MetricsError if self.persisted?
 
       return false if self.invalid?
 
@@ -89,8 +108,8 @@ module Influxer
     end
 
     def write!
-      raise MetricsInvalid.new('Validation failed') if self.invalid?
-      self.write
+      fail MetricsInvalid if self.invalid?
+      write
     end
 
     def write_point
@@ -103,39 +122,19 @@ module Influxer
     end
 
     def series
-      quote_series(self.class.series)
+      self.class.quoted_series(self.class.series, self)
     end
 
     def client
       Influxer.client
     end
 
-
     attributes :time
-
-
-    def quote_series(val)
-      case val
-      when Regexp
-        val.inspect
-      when Proc
-        quote_series(self.class.series.call(self))
-      when Array
-        if val.length > 1
-          "merge(#{ val.map{ |s| quote_series(s) }.join(',') })"
-        else
-          quote_series(val.first)
-        end
-      else
-        '"'+val.to_s.gsub(/\"/){ %q{\"} }+'"'
-      end
-    end
 
     private
 
     def unquote(name)
-      name.gsub(/(\A['"]|['"]\z)/,'')
+      name.gsub(/(\A['"]|['"]\z)/, '')
     end
-
   end
 end

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Influxer::Metrics do
   before do
-    allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|    
+    allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|
       sql
     end
   end
@@ -40,7 +40,22 @@ describe Influxer::Metrics do
     end
 
     it "should work with regexp fanouts" do
-      expect(dappy.where(dummy_id: 100).by_user(/[1-3]/).daily.to_sql).to eq "select * from merge(/^dummy_by_day_user_[1-3]$/) where (dummy_id=100)"
+      expect(dappy.where(dummy_id: 100).by_user(/[1-3]/).daily.to_sql)
+        .to eq "select * from /^dummy_by_day_user_[1-3]$/ where (dummy_id=100)"
+    end
+  end
+
+  describe "#prepare_fanout_points" do
+    before do
+      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, _sql|
+        JSON.parse(File.read('./spec/fixtures/fanout_series.json'))
+      end
+    end
+
+    it "sets fanout fields values" do
+      res = dappy.by_user(/\d+/).daily.to_a
+      expect(res.detect { |v| v["user"] == '6' }).to include('time_spent' => 100, 'by' => 'day')
+      expect(res.select { |v| v["user"] == '2' }.size).to eq 2
     end
   end
 end

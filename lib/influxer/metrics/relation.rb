@@ -3,13 +3,14 @@ require 'influxer/metrics/relation/fanout_query'
 require 'influxer/metrics/relation/calculations'
 
 module Influxer
+  # Relation is used to build queries
   class Relation
-    attr_reader :values
-
     include Influxer::TimeQuery
     include Influxer::FanoutQuery
     include Influxer::Calculations
-    
+
+    attr_reader :values
+
     MULTI_VALUE_METHODS = [:select, :where, :group]
 
     MULTI_KEY_METHODS = [:fanout]
@@ -62,25 +63,25 @@ module Influxer
       CODE
     end
 
-
     class << self
       # delegate array methods to to_a
-      delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join, to: :to_a
+      delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join,
+               to: :to_a
     end
 
     # Initialize new Relation for 'klass' (Class) metrics.
-    # 
+    #
     # Available params:
-    #  :attributes - hash of attributes to be included to new Metrics object and where clause of Relation
-    # 
+    #  :attributes - hash of attributes to be included to new Metrics object
+    #  and where clause of Relation
+    #
     def initialize(klass, params = {})
       @klass = klass
       @instance = klass.new params[:attributes]
-      self.reset
-      self.where(params[:attributes]) if params[:attributes].present?
+      reset
+      where(params[:attributes]) if params[:attributes].present?
       self
     end
-
 
     def write(params = {})
       build params
@@ -88,14 +89,14 @@ module Influxer
     end
 
     def build(params = {})
-      params.each do |key,val|
+      params.each do |key, val|
         @instance.send("#{key}=", val) if @instance.respond_to?(key)
       end
       @instance
     end
 
     # accepts hash or strings conditions
-    def where(*args,**hargs)
+    def where(*args, **hargs)
       build_where(args, hargs, false)
       self
     end
@@ -107,34 +108,24 @@ module Influxer
 
     def to_sql
       sql = ["select"]
+      select_values << "*" if select_values.empty?
 
-      if select_values.empty?
-        sql << "*"
-      else
-        sql << select_values.uniq.join(",")
-      end 
+      sql << select_values.uniq.join(",")
 
       sql << "from #{ build_series_name }"
+      sql << "merge #{ @klass.quoted_series(merge_value) }" unless merge_value.nil?
 
-      unless merge_value.nil?
-        sql << "merge #{ @instance.quote_series(merge_value) }"
+      unless group_values.empty? && time_value.nil?
+        group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
+        group_fields.uniq!
+        sql << "group by #{ group_fields.join(',') }"
       end
 
-      unless group_values.empty? and time_value.nil?
-        sql << "group by #{ (time_value.nil? ? [] : ['time('+@values[:time]+')']).concat(group_values).uniq.join(",") }"
-      end
+      sql << "fill(#{ fill_value })" unless fill_value.nil?
 
-      unless fill_value.nil?
-        sql << "fill(#{ fill_value })"
-      end
+      sql << "where #{ where_values.join(' and ') }" unless where_values.empty?
 
-      unless where_values.empty?
-        sql << "where #{ where_values.join(" and ") }"
-      end
-
-      unless limit_value.nil?
-        sql << "limit #{ limit_value }"
-      end
+      sql << "limit #{ limit_value }" unless limit_value.nil?
       sql.join " "
     end
 
@@ -156,10 +147,10 @@ module Influxer
         select_values.clear
         limit(1).load
       end
-      return @records.empty? 
+      @records.empty?
     end
 
-    def as_json(options=nil)
+    def as_json(options = nil)
       to_a.as_json(options)
     end
 
@@ -174,9 +165,7 @@ module Influxer
 
       sql << "from #{@instance.series}"
 
-      unless where_values.empty?
-        sql << "where #{where_values.join(" and ")}"
-      end
+      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
 
       sql = sql.join " "
 
@@ -193,11 +182,11 @@ module Influxer
     def merge!(rel)
       return self if rel.nil?
       MULTI_VALUE_METHODS.each do |method|
-        (@values[method]||=[]).concat(rel.values[method]).uniq! unless rel.values[method].nil?
+        (@values[method] ||= []).concat(rel.values[method]).uniq! unless rel.values[method].nil?
       end
 
       MULTI_KEY_METHODS.each do |method|
-        (@values[method]||={}).merge!(rel.values[method]) unless rel.values[method].nil?
+        (@values[method] ||= {}).merge!(rel.values[method]) unless rel.values[method].nil?
       end
 
       SINGLE_VALUE_METHODS.each do |method|
@@ -207,93 +196,93 @@ module Influxer
       self
     end
 
-
     protected
-      def build_where(args, hargs, negate)
-        case
-        when (args.present? and args[0].is_a?(String))
-          where_values.concat args.map{|str| "(#{str})"}
-        when hargs.present?
-          build_hash_where(hargs, negate)
+
+    def build_where(args, hargs, negate)
+      case
+      when (args.present? && args[0].is_a?(String))
+        where_values.concat args.map { |str| "(#{str})" }
+      when hargs.present?
+        build_hash_where(hargs, negate)
+      else
+        false
+      end
+    end
+
+    def build_hash_where(hargs, negate = false)
+      hargs.each do |key, val|
+        if @klass.fanout?(key)
+          build_fanout(key, val)
         else
-          false
+          where_values << "(#{ build_eql(key, val, negate) })"
         end
       end
+    end
 
-      def build_hash_where(hargs, negate = false)
-        hargs.each do |key, val|
-          if @klass.fanout?(key)
-            build_fanout(key,val)
-          else
-            where_values << "(#{ build_eql(key,val,negate) })"
-          end
-        end
+    def build_eql(key, val, negate)
+      case val
+      when Regexp
+        "#{key}#{ negate ? '!~' : '=~'}#{val.inspect}"
+      when Array
+        build_in(key, val, negate)
+      when Range
+        build_range(key, val, negate)
+      else
+        "#{key}#{ negate ? '<>' : '='}#{quoted(val)}"
       end
+    end
 
-      def build_eql(key,val,negate)
-        case val
-        when Regexp
-          "#{key}#{ negate ? '!~' : '=~'}#{val.inspect}"
-        when Array
-          build_in(key,val,negate)
-        when Range
-          build_range(key,val,negate)
-        else
-          "#{key}#{ negate ? '<>' : '='}#{quoted(val)}"
-        end  
+    def build_in(key, arr, negate)
+      buf = []
+      arr.each do |val|
+        buf << build_eql(key, val, negate)
       end
+      "#{ buf.join(negate ? ' and ' : ' or ') }"
+    end
 
-      def build_in(key, arr, negate)
-        buf = []
-        arr.each do |val|
-          buf << build_eql(key,val,negate)
-        end
-        "#{ buf.join( negate ? ' and ' : ' or ') }"
+    def build_range(key, val, negate)
+      if negate
+        "#{key}<#{quoted(val.begin)} and #{key}>#{quoted(val.end)}"
+      else
+        "#{key}>#{quoted(val.begin)} and #{key}<#{quoted(val.end)}"
       end
+    end
 
-      def build_range(key,val,negate)
-        unless negate
-          "#{key}>#{quoted(val.begin)} and #{key}<#{quoted(val.end)}"
-        else
-          "#{key}<#{quoted(val.begin)} and #{key}>#{quoted(val.end)}"
-        end  
-      end
+    def loaded?
+      @loaded
+    end
 
-      def loaded?
-        @loaded
-      end
+    def reset
+      @values = {}
+      @records = nil
+      @loaded = false
+      self
+    end
 
-      def reset
-        @values = {}
-        @records = nil
-        @loaded = false
-        self
-      end
+    def reload
+      reset
+      load
+      self
+    end
 
-      def reload
-        self.reset
-        self.load
-        self
+    def quoted(val)
+      if val.is_a?(String) || val.is_a?(Symbol)
+        "'#{val}'"
+      elsif val.is_a?(Time) || val.is_a?(DateTime)
+        "#{val.to_i}s"
+      else
+        val.to_s
       end
+    end
 
-      def quoted(val)
-        if val.is_a?(String) or val.is_a?(Symbol)
-          "'#{val}'"
-        elsif val.kind_of?(Time) or val.kind_of?(DateTime)
-          "#{val.to_i}s"
-        else
-          val.to_s
-        end
-      end
+    def get_points(hash)
+      prepare_fanout_points(hash) if @values[:has_fanout] == true
+      hash.values.reduce([], :+)
+    end
 
-      def method_missing(method, *args, &block)
-        if @klass.respond_to?(method)    
-          merge!(scoping { @klass.public_send(method, *args, &block) })
-        end
-      end
-
-      def get_points(hash)
-        hash.values.reduce([],:+)
-      end
+    def method_missing(method, *args, &block)
+      return super unless @klass.respond_to?(method)
+      merge!(scoping { @klass.public_send(method, *args, &block) })
+    end
   end
-end 
+end

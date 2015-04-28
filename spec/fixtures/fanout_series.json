@@ -1,0 +1,23 @@
+{
+  "dummy_by_day_user_6":
+    [
+      {
+        "time": 1430092800,
+        "sequence_number": 1, 
+        "time_spent": 100
+      }
+    ],
+  "dummy_by_day_user_2":
+    [
+      {
+        "time": 1430092800, 
+        "sequence_number": 1, 
+        "time_spent": 50
+      },
+      {
+        "time": 1430094800, 
+        "sequence_number": 2, 
+        "time_spent": 150
+      }
+    ]
+}

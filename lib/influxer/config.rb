@@ -1,12 +1,13 @@
 require 'anyway'
 
 module Influxer
+  # Influxer configuration
   class Config < Anyway::Config
     config_name :influxdb
 
-    attr_config database: 'db', 
+    attr_config database: 'db',
                 host: 'localhost',
-                port: 8083,
+                port: 8086,
                 username: 'root',
                 password: 'root',
                 use_ssl: false,
@@ -22,9 +23,7 @@ module Influxer
     def load
       super
       # we want pass @cache value as options to cache store, so we want it to be a Hash
-      if @cache == true
-        @cache = {}.with_indifferent_access
-      end
+      @cache = {}.with_indifferent_access if @cache == true
     end
   end
 end

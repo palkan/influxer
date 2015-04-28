@@ -1,11 +1,12 @@
 require 'influxer/version'
 
+# Rails client for InfluxDB
 module Influxer
   require 'influxer/config'
   require 'influxer/client'
   require 'influxer/metrics/metrics'
 
-  module Model
+  module Model # :nodoc:
     require 'influxer/model'
   end
 

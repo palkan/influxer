@@ -1,6 +1,8 @@
+require 'active_support/concern'
+
 module Influxer
   module Scoping
-    module Default
+    module Default # :nodoc: all
       extend ActiveSupport::Concern
 
       included do
@@ -18,8 +20,8 @@ module Influxer
         end
 
         def default_scoped
-          self.default_scopes.inject(Relation.new(self)) do |rel, scope| 
-            rel.merge!(rel.scoping{ scope.call })
+          self.default_scopes.inject(Relation.new(self)) do |rel, scope|
+            rel.merge!(rel.scoping { scope.call })
           end
         end
       end

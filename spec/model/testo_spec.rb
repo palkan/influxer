@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 describe Testo do
-  let(:testo) {  Testo.new receipt_id: 10}
-  specify { expect(testo).to respond_to :metrics } 
-  specify { expect(testo).to respond_to :testo_metrics } 
-  specify { expect(testo).to respond_to :testo2_metrics }  
-  specify { expect(testo).to respond_to :custom_metrics }  
+  let(:testo) {  Testo.new receipt_id: 10 }
+  specify { expect(testo).to respond_to :metrics }
+  specify { expect(testo).to respond_to :testo_metrics }
+  specify { expect(testo).to respond_to :testo2_metrics }
+  specify { expect(testo).to respond_to :custom_metrics }
 
   describe "metrics attributes" do
     it "should add foreign key and inherits" do

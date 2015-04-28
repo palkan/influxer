@@ -3,22 +3,22 @@ require 'influxer/metrics/scoping/default'
 require 'influxer/metrics/scoping/named'
 
 module Influxer
-  module Scoping
+  module Scoping # :nodoc:
     extend ActiveSupport::Concern
 
-    class Error < StandardError; end;
+    class Error < StandardError; end
 
     included do
       include Default
       include Named
     end
 
-    module ClassMethods
-      def current_scope #:nodoc:
+    module ClassMethods # :nodoc:
+      def current_scope
         ScopeRegistry.value_for(:current_scope, name)
       end
 
-      def current_scope=(scope) #:nodoc:
+      def current_scope=(scope)
         ScopeRegistry.set_value_for(:current_scope, name, scope)
       end
     end
@@ -48,7 +48,8 @@ module Influxer
 
       def raise_invalid_scope_type!(scope_type)
         if !VALID_SCOPE_TYPES.include?(scope_type)
-          raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. Scope types must be included in VALID_SCOPE_TYPES"
+          raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
+          Scope types  must be included in VALID_SCOPE_TYPES"
         end
       end
     end

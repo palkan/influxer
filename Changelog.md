@@ -1,3 +1,7 @@
+## 0.2.2
+- Parse fanout queries points to handle _fanouted_ values
+- Add Rubocop config and cleanup code style
+
 ## 0.1.1
 - Add [anyway_config](https://github.com/palkan/anyway_config)
 - Add `empty?` method
