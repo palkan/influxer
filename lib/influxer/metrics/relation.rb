@@ -63,11 +63,9 @@ module Influxer
       CODE
     end
 
-    class << self
-      # delegate array methods to to_a
-      delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join,
-               to: :to_a
-    end
+    # delegate array methods to to_a
+    delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join,
+             to: :to_a
 
     # Initialize new Relation for 'klass' (Class) metrics.
     #
