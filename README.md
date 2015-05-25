@@ -59,4 +59,4 @@ Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://infl
     #=> select * from user_visits where page_id='home'
     ```
     
-Find more on [Wiki](/palkan/influxer/wiki).
+Find more on [Wiki](https://github.com/palkan/influxer/wiki).
