@@ -23,9 +23,9 @@ module Influxer
       delegate(
         *(
           [
-            :write, :select, :where, :group,
-            :merge, :time, :past, :since, :limit,
-            :fill, :delete_all
+            :write, :write!, :select, :where,
+            :group, :merge, :time, :past, :since,
+            :limit, :fill, :delete_all
           ] + Influxer::Calculations::CALCULATION_METHODS
         ),
         to: :all
@@ -127,6 +127,10 @@ module Influxer
 
     def client
       Influxer.client
+    end
+
+    def dup
+      self.class.new(@attributes)
     end
 
     attributes :time

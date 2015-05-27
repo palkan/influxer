@@ -15,6 +15,8 @@ describe Influxer::Metrics do
   specify { expect(metrics_class).to respond_to :attributes }
   specify { expect(metrics_class).to respond_to :set_series }
   specify { expect(metrics_class).to respond_to :series }
+  specify { expect(metrics_class).to respond_to :write }
+  specify { expect(metrics_class).to respond_to :write! }
 
   # query methods
 
@@ -172,6 +174,19 @@ describe Influxer::Metrics do
       it "should respond with relation" do
         expect(metrics_class.all).to be_an_instance_of Influxer::Relation
       end
+    end
+  end
+
+  describe "#dup" do
+    let(:point) { DummyMetrics.new(user_id: 1, dummy_id: 2) }
+    subject { point.dup }
+
+    specify { expect(subject.user_id).to eq 1 }
+    specify { expect(subject.dummy_id).to eq 2 }
+
+    context "persisted" do
+      before { point.write }
+      specify { expect(subject.persisted?).to be_falsey }
     end
   end
 end

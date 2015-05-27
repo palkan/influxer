@@ -82,16 +82,22 @@ module Influxer
     end
 
     def write(params = {})
-      build params
-      @instance.write
+      build(params).write
+    end
+
+    def write!(params = {})
+      build(params).write!
     end
 
     def build(params = {})
+      point = @instance.dup
       params.each do |key, val|
-        @instance.send("#{key}=", val) if @instance.respond_to?(key)
+        point.send("#{key}=", val) if point.respond_to?(key)
       end
-      @instance
+      point
     end
+
+    alias_method :new, :build
 
     # accepts hash or strings conditions
     def where(*args, **hargs)

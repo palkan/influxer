@@ -11,7 +11,8 @@ describe Influxer::Relation do
   let(:rel2) { Influxer::Relation.new DummyComplexMetrics }
 
   specify { expect(rel).to respond_to :write }
-  specify { expect(rel).to respond_to :build }
+  specify { expect(rel.build).to be_a DummyMetrics }
+  specify { expect(rel.new).to be_a DummyMetrics }
 
   # read
   specify { expect(rel).to respond_to :select }
@@ -186,7 +187,7 @@ describe Influxer::Relation do
     end
 
     describe "#limit" do
-      it "should generate valid limi" do
+      it "should generate valid limit" do
         expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100"
       end
     end
