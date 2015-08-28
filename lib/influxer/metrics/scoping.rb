@@ -48,10 +48,9 @@ module Influxer
       private
 
       def raise_invalid_scope_type!(scope_type)
-        if !VALID_SCOPE_TYPES.include?(scope_type)
-          raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
-          Scope types  must be included in VALID_SCOPE_TYPES"
-        end
+        return if VALID_SCOPE_TYPES.include?(scope_type)
+        fail ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
+        Scope types  must be included in VALID_SCOPE_TYPES"
       end
     end
   end

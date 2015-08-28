@@ -220,13 +220,13 @@ describe Influxer::Relation, :query do
 
   describe "#empty?" do
     it "return false if has points" do
-      allow(client).to receive(:query) { { points: [{ time: 1, id: 2 }] } }
+      allow(client).to receive(:query) { [{ "values" => [{ time: 1, id: 2 }] }] }
       expect(rel.empty?).to be_falsey
       expect(rel.present?).to be_truthy
     end
 
     it "return true if no points" do
-      allow(client).to receive(:query) { { points: [] } }
+      allow(client).to receive(:query) { [] }
       expect(rel.empty?).to be_truthy
       expect(rel.present?).to be_falsey
     end
@@ -234,26 +234,25 @@ describe Influxer::Relation, :query do
 
   describe "#delete_all" do
     it do
-      Timecop.freeze(Time.now) do
-        expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).delete_all)
-          .to eq "delete from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)"
-      end
+      Timecop.freeze(Time.now)
+      expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).delete_all)
+        .to eq "delete from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)"
     end
   end
 
   describe "#inspect" do
     it "return correct String represantation of empty relation" do
-      allow(client).to receive(:query) { { points: [] } }
+      allow(rel).to receive(:to_a) { [] }
       expect(rel.inspect).to eq "#<Influxer::Relation []>"
     end
 
     it "return correct String represantation of non-empty relation" do
-      allow(client).to receive(:query) { { "dummy" => [1, 2, 3] } }
+      allow(rel).to receive(:to_a) { [1, 2, 3] }
       expect(rel.inspect).to eq "#<Influxer::Relation [1, 2, 3]>"
     end
 
     it "return correct String represantation of non-empty large (>11) relation" do
-      allow(client).to receive(:query) { { "dummy" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] } }
+      allow(rel).to receive(:to_a) { [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] }
       expect(rel.inspect).to eq "#<Influxer::Relation [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...]>"
     end
   end

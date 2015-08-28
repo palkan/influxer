@@ -49,7 +49,7 @@ module Influxer
     def past(val)
       case val
       when Symbol
-        where("time > now() - #{ TIME_ALIASES[val] || ('1'+val.to_s) }")
+        where("time > now() - #{TIME_ALIASES[val] || ('1' + val.to_s)}")
       when String
         where("time > now() - #{val}")
       else

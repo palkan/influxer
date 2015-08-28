@@ -138,6 +138,25 @@ describe Influxer::Metrics, :query do
     end
   end
 
+  describe ".tags" do
+    let(:dummy1) { Class.new(DummyMetrics) }
+    let!(:dummy2) do
+      Class.new(dummy1) do
+        tags :zone
+      end
+    end
+
+    it "inherits tags" do
+      expect(dummy2.tag_names).to include('dummy_id', 'host', 'zone')
+    end
+
+    it "clones tags" do
+      dummy1.tags :status
+      expect(dummy1.tag_names).to include('status')
+      expect(dummy2.tag_names).not_to include('status')
+    end
+  end
+
   describe "#dup" do
     let(:point) { DummyMetrics.new(user_id: 1, dummy_id: 2) }
     subject { point.dup }
@@ -155,15 +174,16 @@ describe Influxer::Metrics, :query do
     let(:dummy_metrics) do
       Class.new(described_class) do
         set_series :dummies
-        attributes :user_id, :dummy_id
+        tags :dummy_id, :host
+        attributes :user_id
       end
     end
 
     it "write data and return point" do
       expect(client)
-        .to receive(:write_point).with("dummies", values: { user_id: 1, dummy_id: 2 })
+        .to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 })
 
-      point = dummy_metrics.write(user_id: 1, dummy_id: 2)
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test')
       expect(point.persisted?).to be_truthy
       expect(point.user_id).to eq 1
       expect(point.dummy_id).to eq 2

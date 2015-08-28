@@ -10,6 +10,7 @@ if ENV['COVER']
 end
 
 require 'rspec'
+require "webmock/rspec"
 require 'pry-byebug'
 require 'timecop'
 

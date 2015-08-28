@@ -8,6 +8,7 @@ module Influxer
         :percentile, :histogram, :top, :bottom
       ]
 
+    # rubocop:disable Metrics/LineLength
     CALCULATION_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}(val, option=nil)                                                   # def count(val)

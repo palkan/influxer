@@ -6,6 +6,10 @@ module Influxer
     extend ActiveSupport::Concern
 
     module ClassMethods # :nodoc:
+      # rubocop:disable Style/PredicateName
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
       def has_metrics(*args, **params)
         metrics_name = args.empty? ? "metrics" : args.first.to_s
 

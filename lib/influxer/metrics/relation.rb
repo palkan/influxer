@@ -3,6 +3,7 @@ require 'influxer/metrics/relation/calculations'
 
 module Influxer
   # Relation is used to build queries
+  # rubocop:disable Metrics/ClassLength
   class Relation
     include Influxer::TimeQuery
     include Influxer::Calculations
@@ -107,29 +108,36 @@ module Influxer
       build_where(args, hargs, true)
       self
     end
-
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/PerceivedComplexity
     def to_sql
       sql = ["select"]
       select_values << "*" if select_values.empty?
 
       sql << select_values.uniq.join(",")
 
-      sql << "from #{ build_series_name }"
-      sql << "merge #{ @klass.quoted_series(merge_value) }" unless merge_value.nil?
+      sql << "from #{build_series_name}"
+      sql << "merge #{@klass.quoted_series(merge_value)}" unless merge_value.nil?
 
       unless group_values.empty? && time_value.nil?
         group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
         group_fields.uniq!
-        sql << "group by #{ group_fields.join(',') }"
+        sql << "group by #{group_fields.join(',')}"
       end
 
-      sql << "fill(#{ fill_value })" unless fill_value.nil?
+      sql << "fill(#{fill_value})" unless fill_value.nil?
 
-      sql << "where #{ where_values.join(' and ') }" unless where_values.empty?
+      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
 
-      sql << "limit #{ limit_value }" unless limit_value.nil?
+      sql << "limit #{limit_value}" unless limit_value.nil?
       sql.join " "
     end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def to_a
       return @records if loaded?
@@ -181,6 +189,8 @@ module Influxer
       @klass.current_scope = previous
     end
 
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength
     def merge!(rel)
       return self if rel.nil?
       MULTI_VALUE_METHODS.each do |method|
@@ -197,6 +207,8 @@ module Influxer
 
       self
     end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     protected
 
@@ -217,20 +229,20 @@ module Influxer
 
     def build_hash_where(hargs, negate = false)
       hargs.each do |key, val|
-        where_values << "(#{ build_eql(key, val, negate) })"
+        where_values << "(#{build_eql(key, val, negate)})"
       end
     end
 
     def build_eql(key, val, negate)
       case val
       when Regexp
-        "#{key}#{ negate ? '!~' : '=~'}#{val.inspect}"
+        "#{key}#{negate ? '!~' : '=~'}#{val.inspect}"
       when Array
         build_in(key, val, negate)
       when Range
         build_range(key, val, negate)
       else
-        "#{key}#{ negate ? '<>' : '='}#{quoted(val)}"
+        "#{key}#{negate ? '<>' : '='}#{quoted(val)}"
       end
     end
 
@@ -239,7 +251,7 @@ module Influxer
       arr.each do |val|
         buf << build_eql(key, val, negate)
       end
-      "#{ buf.join(negate ? ' and ' : ' or ') }"
+      "#{buf.join(negate ? ' and ' : ' or ')}"
     end
 
     def build_range(key, val, negate)
@@ -277,8 +289,14 @@ module Influxer
       end
     end
 
-    def get_points(hash)
-      hash.values.reduce([], :+)
+    def get_points(list)
+      list.reduce([]) do |a, e|
+        a + e.fetch("values", []).map { |v| inject_tags(v, e.fetch("tags", {})) }
+      end
+    end
+
+    def inject_tags(val, tags)
+      val.merge(tags)
     end
 
     def method_missing(method, *args, &block)

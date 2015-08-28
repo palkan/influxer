@@ -1,5 +1,6 @@
 class DummyMetrics < Influxer::Metrics # :nodoc:
-  attributes :dummy_id, :user_id
+  tags :dummy_id, :host
+  attributes :user_id
 
   validates_presence_of :dummy_id, :user_id
 

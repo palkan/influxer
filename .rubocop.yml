@@ -11,6 +11,12 @@ AllCops:
   DisplayCopNames: true
   StyleGuideCopsOnly: false
 
+Style/AccessorMethodName:
+  Enabled: false
+
+Style/TrivialAccessors:
+  Enabled: false
+
 Style/Documentation:
   Exclude:
     - 'spec/**/*.rb'
@@ -19,11 +25,14 @@ Style/StringLiterals:
   Enabled: false
 
 Style/SpaceInsideStringInterpolation:
-  EnforcedStyle: space
+  EnforcedStyle: no_space
 
 Style/BlockDelimiters:
   Exclude:
     - 'spec/**/*.rb'
+
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
 
 Metrics/MethodLength:
   Exclude:
