@@ -1,0 +1,2 @@
+gem 'arel', github: 'rails/arel'
+gem 'rails', github: 'rails/rails'

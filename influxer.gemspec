@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split($/)
   s.require_paths = ["lib"]
 
-  s.add_runtime_dependency "rails", '~> 4.0'
+  s.add_runtime_dependency "rails", '>= 4.0'
   s.add_dependency "influxdb", "~> 0.1.8"
   s.add_dependency "anyway_config", "~>0.3"
 
