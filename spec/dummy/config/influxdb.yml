@@ -1,5 +1,0 @@
-test:
-  host: "test.host"
-  retry: 5
-  username: "root"
-  password: "root"

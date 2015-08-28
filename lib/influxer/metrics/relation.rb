@@ -1,12 +1,10 @@
 require 'influxer/metrics/relation/time_query'
-require 'influxer/metrics/relation/fanout_query'
 require 'influxer/metrics/relation/calculations'
 
 module Influxer
   # Relation is used to build queries
   class Relation
     include Influxer::TimeQuery
-    include Influxer::FanoutQuery
     include Influxer::Calculations
 
     attr_reader :values
@@ -159,7 +157,7 @@ module Influxer
     end
 
     def load
-      @records = get_points(@instance.client.cached_query(to_sql))
+      @records = get_points(@instance.client.query(to_sql))
       @loaded = true
       @records
     end
@@ -173,7 +171,7 @@ module Influxer
 
       sql = sql.join " "
 
-      @instance.client.query sql
+      @instance.client.exec sql
     end
 
     def scoping
@@ -202,6 +200,10 @@ module Influxer
 
     protected
 
+    def build_series_name
+      @instance.series
+    end
+
     def build_where(args, hargs, negate)
       case
       when (args.present? && args[0].is_a?(String))
@@ -215,11 +217,7 @@ module Influxer
 
     def build_hash_where(hargs, negate = false)
       hargs.each do |key, val|
-        if @klass.fanout?(key)
-          build_fanout(key, val)
-        else
-          where_values << "(#{ build_eql(key, val, negate) })"
-        end
+        where_values << "(#{ build_eql(key, val, negate) })"
       end
     end
 
@@ -280,7 +278,6 @@ module Influxer
     end
 
     def get_points(hash)
-      prepare_fanout_points(hash) if @values[:has_fanout] == true
       hash.values.reduce([], :+)
     end
 

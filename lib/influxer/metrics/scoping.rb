@@ -3,6 +3,7 @@ require 'influxer/metrics/scoping/default'
 require 'influxer/metrics/scoping/named'
 
 module Influxer
+  # Clone of ActiveRecord::Relation scoping
   module Scoping # :nodoc:
     extend ActiveSupport::Concern
 

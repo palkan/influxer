@@ -6,5 +6,5 @@ local_gemfile = 'Gemfile.local'
 if File.exist?(local_gemfile)
   eval(File.read(local_gemfile)) # rubocop:disable Lint/Eval
 else
-  gem 'rails', '~>4.2'
+  gem 'activerecord', '~>4.2'
 end

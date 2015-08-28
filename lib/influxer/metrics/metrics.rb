@@ -1,6 +1,5 @@
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
-require 'influxer/metrics/fanout'
 require 'active_model'
 
 module Influxer
@@ -14,7 +13,6 @@ module Influxer
     extend ActiveModel::Callbacks
 
     include Influxer::Scoping
-    include Influxer::Fanout
 
     define_model_callbacks :write
 
@@ -44,6 +42,8 @@ module Influxer
           end
         end
       end
+
+      alias_method :tags, :attributes
 
       def inherited(subclass)
         subclass.set_series
@@ -113,7 +113,7 @@ module Influxer
     end
 
     def write_point
-      client.write_point unquote(series), @attributes
+      client.write_point unquote(series), values: @attributes
       @persisted = true
     end
 

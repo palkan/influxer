@@ -18,6 +18,9 @@ Style/Documentation:
 Style/StringLiterals: 
   Enabled: false
 
+Style/SpaceInsideStringInterpolation:
+  EnforcedStyle: space
+
 Style/BlockDelimiters:
   Exclude:
     - 'spec/**/*.rb'
