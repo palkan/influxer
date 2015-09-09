@@ -2,7 +2,7 @@
 
 ## Influxer
 
-**NOTE**: master is updated to support InfluxDB 0.9.x.
+**NOTE**: Version 0.3.x supports InfluxDB >= 0.9.0. For InfluxDB 0.8.x use [version 0.2.5](https://github.com/palkan/influxer/tree/0.2.5).
 
 Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://influxdb.com/) with many useful features, such as:
 - Familar query language (use `select`, `where`, `not`, `group` etc).
