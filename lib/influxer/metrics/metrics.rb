@@ -1,6 +1,5 @@
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
-require 'influxer/metrics/fanout'
 require 'active_model'
 
 module Influxer
@@ -8,13 +7,13 @@ module Influxer
   class MetricsInvalid < MetricsError; end
 
   # Base class for InfluxDB querying and writing
+  # rubocop:disable Metrics/ClassLength
   class Metrics
     include ActiveModel::Model
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
 
     include Influxer::Scoping
-    include Influxer::Fanout
 
     define_model_callbacks :write
 
@@ -24,14 +23,15 @@ module Influxer
         *(
           [
             :write, :write!, :select, :where,
-            :group, :merge, :time, :past, :since,
-            :limit, :fill, :delete_all
+            :group, :time, :past, :since,
+            :limit, :offset, :fill, :delete_all
           ] + Influxer::Calculations::CALCULATION_METHODS
         ),
         to: :all
       )
 
       attr_reader :series
+      attr_accessor :tag_names
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -45,10 +45,23 @@ module Influxer
         end
       end
 
-      def inherited(subclass)
-        subclass.set_series
+      def tags(*attrs)
+        attributes(*attrs)
+        self.tag_names ||= []
+        self.tag_names += attrs.map(&:to_s)
       end
 
+      def tag?(name)
+        tag_names.include?(name.to_s)
+      end
+
+      def inherited(subclass)
+        subclass.set_series
+        subclass.tag_names = tag_names.nil? ? [] : tag_names.dup
+      end
+
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
       def set_series(*args)
         if args.empty?
           matches = to_s.match(/^(.*)Metrics$/)
@@ -63,6 +76,8 @@ module Influxer
           @series = args
         end
       end
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       def all
         if current_scope
@@ -72,6 +87,7 @@ module Influxer
         end
       end
 
+      # rubocop:disable Metrics/MethodLength
       def quoted_series(val = @series, instance = nil)
         case val
         when Regexp
@@ -80,7 +96,7 @@ module Influxer
           quoted_series(val.call(instance))
         when Array
           if val.length > 1
-            "merge(#{ val.map { |s| quoted_series(s) }.join(',') })"
+            "merge(#{val.map { |s| quoted_series(s) }.join(',')})"
           else
             quoted_series(val.first)
           end
@@ -88,7 +104,10 @@ module Influxer
           '"' + val.to_s.gsub(/\"/) { %q(\") } + '"'
         end
       end
+      # rubocop:enable Metrics/MethodLength
     end
+
+    delegate :tag_names, to: :class
 
     def initialize(attributes = {})
       @attributes = {}
@@ -113,7 +132,7 @@ module Influxer
     end
 
     def write_point
-      client.write_point unquote(series), @attributes
+      client.write_point unquote(series), values: values, tags: tags
       @persisted = true
     end
 
@@ -131,6 +150,16 @@ module Influxer
 
     def dup
       self.class.new(@attributes)
+    end
+
+    # Returns hash with metrics values
+    def values
+      @attributes.reject { |k, _| tag_names.include?(k.to_s) }
+    end
+
+    # Returns hash with metrics tags
+    def tags
+      @attributes.select { |k, _| tag_names.include?(k.to_s) }
     end
 
     attributes :time

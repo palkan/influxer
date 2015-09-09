@@ -2,6 +2,8 @@
 
 ## Influxer
 
+**NOTE**: master is updated to support InfluxDB 0.9.x.
+
 Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://influxdb.com/) with many useful features, such as:
 - Familar query language (use `select`, `where`, `not`, `group` etc).
 - Support for Regex conditions: `where(page_id: /^home\/.*/) #=> select * ... where page_id=~/^home\/.*/`.
@@ -14,6 +16,8 @@ Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://infl
     ```ruby
     class Metrics < Influxer::Metrics
         default_scope -> { time(:hour).limit(1000) }
+        tags :account_id
+        attributes :value
         scope :unlimited, -> { limit(nil) }
         scope :by_account, -> (id) { where(account_id: id) if id.present? }
     end
@@ -25,23 +29,6 @@ Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://infl
     # => select * from "metrics" group by time(1w) where account_id=1
 
     ```
-- Support for handling fanout series as one metrics.
-    ```ruby
-    class Metrics < Influxer::Metrics
-        fanout :account, :user, :page
-    end
-
-    Metrics.where(account: 1)
-    # => select * from "metrics_account_1" 
-
-
-    Metrics.where(page: 'home').where(user: 12)
-    # => select * from "metrics_user_12_page_home" 
-
-    Metrics.where(page: /(home|faq)/).where(account: 1).where(user: 12)
-    # => select * from /^metrics_account_1_user_12_page_(home|faq)$/ 
-
-    ``` 
 - Integrate with your model:
     ```ruby
     class UserVisits < Influxer::Metrics

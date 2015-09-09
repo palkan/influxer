@@ -1,12 +1,6 @@
 require 'spec_helper'
 
-describe Influxer::Metrics do
-  before do
-    allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|
-      sql
-    end
-  end
-
+describe Influxer::Metrics, :query do
   let(:klass) do
     Class.new(Influxer::Metrics) do
       set_series 'dummy'
@@ -34,35 +28,35 @@ describe Influxer::Metrics do
   end
 
   describe "default scope" do
-    it "should work without default scope" do
+    it "works without default scope" do
       expect(klass.all.to_sql).to eq "select * from \"dummy\""
     end
 
-    it "should work with default scope" do
+    it "works with default scope" do
       expect(dummy.all.to_sql).to eq "select * from \"dummy\" group by time(1h)"
     end
 
-    it "should work with unscoped" do
+    it "works with unscoped" do
       expect(dummy.unscoped.to_sql).to eq "select * from \"dummy\""
     end
 
-    it "should work with several defaults" do
+    it "works with several defaults" do
       expect(dappy.where(user_id: 1).to_sql)
         .to eq "select * from \"dummy\" group by time(1h) where (user_id=1) limit 100"
     end
   end
 
   describe "named scope" do
-    it "should work with named scope" do
+    it "works with named scope" do
       expect(doomy.by_user(1).to_sql)
         .to eq "select * from \"dummy\" group by time(1h) where (user_id=1) limit 100"
     end
 
-    it "should work with named scope with empty relation" do
+    it "works with named scope with empty relation" do
       expect(doomy.by_user(nil).to_sql).to eq "select * from \"dummy\" group by time(1h) limit 100"
     end
 
-    it "should work with several scopes" do
+    it "works with several scopes" do
       expect(doomy.where(dummy_id: 100).by_user([1, 2, 3]).daily.to_sql)
         .to eq "select * from \"dummy\" group by time(1d) where (dummy_id=100) and (user_id=1 or user_id=2 or user_id=3) limit 100"
     end

@@ -1,5 +1,4 @@
 require 'influxer'
-require 'rails'
 
 module Influxer
   class Engine < Rails::Engine # :nodoc:

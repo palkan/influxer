@@ -5,20 +5,29 @@ module Influxer
   class Config < Anyway::Config
     config_name :influxdb
 
-    attr_config database: 'db',
-                host: 'localhost',
-                port: 8086,
-                username: 'root',
-                password: 'root',
-                use_ssl: false,
-                async: true,
-                cache: false,
-                retry: false,
-                time_precision: 's',
-                initial_delay: 0.01,
-                max_delay: 30,
-                read_timeout: 30,
-                write_timeout: 5
+    # influxdb-ruby configuration parameters + cache option
+    attr_config :hosts,
+                :host,
+                :port,
+                :username,
+                :password,
+                :database,
+                :time_precision,
+                :use_ssl,
+                :verify_ssl,
+                :ssl_ca_cert,
+                :auth_method,
+                :initial_delay,
+                :max_delay,
+                :open_timeout,
+                :read_timeout,
+                :retry,
+                :prefix,
+                :denormalize,
+                :udp,
+                :async,
+                database: 'db',
+                cache: false
 
     def load
       super

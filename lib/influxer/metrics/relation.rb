@@ -1,13 +1,14 @@
 require 'influxer/metrics/relation/time_query'
-require 'influxer/metrics/relation/fanout_query'
 require 'influxer/metrics/relation/calculations'
+require 'influxer/metrics/relation/where_clause'
 
 module Influxer
   # Relation is used to build queries
+  # rubocop:disable Metrics/ClassLength
   class Relation
     include Influxer::TimeQuery
-    include Influxer::FanoutQuery
     include Influxer::Calculations
+    include Influxer::WhereClause
 
     attr_reader :values
 
@@ -15,11 +16,13 @@ module Influxer
 
     MULTI_KEY_METHODS = [:fanout]
 
-    SINGLE_VALUE_METHODS = [:fill, :limit, :merge, :time]
+    SINGLE_VALUE_METHODS = [:fill, :time, :limit, :offset, :slimit, :soffset, :normalized]
 
     MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
 
-    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :merge]
+    SINGLE_VALUE_SIMPLE_METHODS = [:fill]
+
+    LIMIT_METHODS = [:limit, :offset]
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -63,6 +66,16 @@ module Influxer
       CODE
     end
 
+    LIMIT_METHODS.each do |name|
+      class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(val, measurement = false)         # def limit(val, measurement = false)
+          @values[:#{name}] = val                     #   @values[:limit] = val
+          @values[:s#{name}] = measurement ? 's' : '' #   @values[:slimit] = measurement ? 's' : ''
+          self                                        #   self
+        end                                           # end
+      CODE
+    end
+
     # delegate array methods to to_a
     delegate :to_xml, :to_yaml, :length, :collect, :map, :each, :all?, :include?, :to_ary, :join,
              to: :to_a
@@ -99,39 +112,45 @@ module Influxer
 
     alias_method :new, :build
 
-    # accepts hash or strings conditions
-    def where(*args, **hargs)
-      build_where(args, hargs, false)
+    def normalized
+      @values[:normalized] = true
       self
     end
 
-    def not(*args, **hargs)
-      build_where(args, hargs, true)
-      self
+    def normalized?
+      @values[:normalized] == true
     end
 
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/PerceivedComplexity
     def to_sql
       sql = ["select"]
       select_values << "*" if select_values.empty?
 
       sql << select_values.uniq.join(",")
 
-      sql << "from #{ build_series_name }"
-      sql << "merge #{ @klass.quoted_series(merge_value) }" unless merge_value.nil?
+      sql << "from #{build_series_name}"
 
       unless group_values.empty? && time_value.nil?
         group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
         group_fields.uniq!
-        sql << "group by #{ group_fields.join(',') }"
+        sql << "group by #{group_fields.join(',')}"
       end
 
-      sql << "fill(#{ fill_value })" unless fill_value.nil?
+      sql << "fill(#{fill_value})" unless fill_value.nil?
 
-      sql << "where #{ where_values.join(' and ') }" unless where_values.empty?
+      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
 
-      sql << "limit #{ limit_value }" unless limit_value.nil?
+      sql << "#{slimit_value}limit #{limit_value}" unless limit_value.nil?
+      sql << "#{soffset_value}offset #{offset_value}" unless offset_value.nil?
       sql.join " "
     end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def to_a
       return @records if loaded?
@@ -159,13 +178,13 @@ module Influxer
     end
 
     def load
-      @records = get_points(@instance.client.cached_query(to_sql))
+      @records = get_points(@instance.client.query(to_sql, denormalize: !normalized?))
       @loaded = true
       @records
     end
 
     def delete_all
-      sql = ["delete"]
+      sql = ["drop series"]
 
       sql << "from #{@instance.series}"
 
@@ -173,7 +192,7 @@ module Influxer
 
       sql = sql.join " "
 
-      @instance.client.query sql
+      @instance.client.exec sql
     end
 
     def scoping
@@ -183,6 +202,8 @@ module Influxer
       @klass.current_scope = previous
     end
 
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength
     def merge!(rel)
       return self if rel.nil?
       MULTI_VALUE_METHODS.each do |method|
@@ -199,57 +220,13 @@ module Influxer
 
       self
     end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     protected
 
-    def build_where(args, hargs, negate)
-      case
-      when (args.present? && args[0].is_a?(String))
-        where_values.concat args.map { |str| "(#{str})" }
-      when hargs.present?
-        build_hash_where(hargs, negate)
-      else
-        false
-      end
-    end
-
-    def build_hash_where(hargs, negate = false)
-      hargs.each do |key, val|
-        if @klass.fanout?(key)
-          build_fanout(key, val)
-        else
-          where_values << "(#{ build_eql(key, val, negate) })"
-        end
-      end
-    end
-
-    def build_eql(key, val, negate)
-      case val
-      when Regexp
-        "#{key}#{ negate ? '!~' : '=~'}#{val.inspect}"
-      when Array
-        build_in(key, val, negate)
-      when Range
-        build_range(key, val, negate)
-      else
-        "#{key}#{ negate ? '<>' : '='}#{quoted(val)}"
-      end
-    end
-
-    def build_in(key, arr, negate)
-      buf = []
-      arr.each do |val|
-        buf << build_eql(key, val, negate)
-      end
-      "#{ buf.join(negate ? ' and ' : ' or ') }"
-    end
-
-    def build_range(key, val, negate)
-      if negate
-        "#{key}<#{quoted(val.begin)} and #{key}>#{quoted(val.end)}"
-      else
-        "#{key}>#{quoted(val.begin)} and #{key}<#{quoted(val.end)}"
-      end
+    def build_series_name
+      @instance.series
     end
 
     def loaded?
@@ -269,8 +246,8 @@ module Influxer
       self
     end
 
-    def quoted(val)
-      if val.is_a?(String) || val.is_a?(Symbol)
+    def quoted(val, key = nil)
+      if val.is_a?(String) || val.is_a?(Symbol) || @klass.tag?(key)
         "'#{val}'"
       elsif val.is_a?(Time) || val.is_a?(DateTime)
         "#{val.to_i}s"
@@ -279,9 +256,15 @@ module Influxer
       end
     end
 
-    def get_points(hash)
-      prepare_fanout_points(hash) if @values[:has_fanout] == true
-      hash.values.reduce([], :+)
+    def get_points(list)
+      return list if normalized?
+      list.reduce([]) do |a, e|
+        a + e.fetch("values", []).map { |v| inject_tags(v, e["tags"] || {}) }
+      end
+    end
+
+    def inject_tags(val, tags)
+      val.merge(tags)
     end
 
     def method_missing(method, *args, &block)

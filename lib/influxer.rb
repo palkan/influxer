@@ -10,7 +10,8 @@ module Influxer
     require 'influxer/model'
   end
 
-  require 'influxer/engine'
+  require 'influxer/rails/client' if defined?(Rails)
+  require 'influxer/engine' if defined?(Rails)
 
   def self.config
     @config ||= Config.new
@@ -24,7 +25,8 @@ module Influxer
     @client ||= Client.new
   end
 
-  def self.reset
+  def self.reset!
+    @client.stop! unless @client.nil?
     @config = nil
     @client = nil
   end

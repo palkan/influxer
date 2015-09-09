@@ -4,18 +4,24 @@ module Influxer
       [
         :count, :min, :max, :mean,
         :mode, :median, :distinct, :derivative,
-        :stddev, :sum, :first, :last, :difference,
-        :percentile, :histogram, :top, :bottom
+        :stddev, :sum, :first, :last
       ]
 
+    # rubocop:disable Metrics/LineLength
     CALCULATION_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}(val, option=nil)                                                   # def count(val)
-          @values[:has_calculations] = true                                            #   @values[:has_calculations] = true
-          select_values << "#{name}(\#\{val\}\#\{option ? ','+option.to_s : ''\})"     #   select_values << "count(\#\{val\})"
-          self                                                                         #   self
-        end                                                                            # end
+        def #{name}(val, alias_name = nil)                                                        # def count(val)
+          @values[:has_calculations] = true                                                       #   @values[:has_calculations] = true
+          select_values << "#{name}(\#\{val\})\#\{alias_name ? ' as '+alias_name.to_s : ''\}"     #   select_values << "count(\#\{val\})"
+          self                                                                                    #   self
+        end                                                                                       # end
       CODE
+    end
+
+    def percentile(name, val, alias_name = nil)
+      @values[:has_calculations] = true
+      select_values << "percentile(#{name},#{val})#{alias_name ? ' as ' + alias_name.to_s : ''}"
+      self
     end
   end
 end

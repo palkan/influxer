@@ -1,0 +1,21 @@
+{
+    "results": [
+        {
+            "series": [
+                {
+                    "name": "cpu_load_short",
+                    "tags": {
+                        "host": "server01",
+                        "region": "us-west"
+                    },
+                    "columns": [
+                        "time",
+                        "value"
+                    ],
+                    "values": [
+                    ]
+                }
+            ]
+        }
+    ]
+}

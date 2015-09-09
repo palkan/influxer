@@ -8,7 +8,9 @@ module Influxer
       week: '1w',
       day: '1d',
       month: '30d'
-    }
+    }.freeze
+
+    FILL_RESERVED = %i(null previous none).freeze
 
     # Add group value to relation. To be used instead of `group("time(...)").
     # Accepts symbols and strings.
@@ -20,7 +22,6 @@ module Influxer
     #
     #    Metrics.time("4d", fill: 0)
     #    # select * from metrics group by time(4d) fill(0)
-
     def time(val, options = {})
       if val.is_a?(Symbol)
         @values[:time] = TIME_ALIASES[val] || '1' + val.to_s
@@ -28,9 +29,7 @@ module Influxer
         @values[:time] = val
       end
 
-      unless options[:fill].nil?
-        fill((options[:fill] == :null) ? 'null' : options[:fill].to_i)
-      end
+      build_fill(options[:fill])
       self
     end
 
@@ -45,11 +44,10 @@ module Influxer
     #
     #    Metrics.past(2.days)
     #    # select * from metrics where time > now() - 172800s
-
     def past(val)
       case val
       when Symbol
-        where("time > now() - #{ TIME_ALIASES[val] || ('1'+val.to_s) }")
+        where("time > now() - #{TIME_ALIASES[val] || ('1' + val.to_s)}")
       when String
         where("time > now() - #{val}")
       else
@@ -68,6 +66,13 @@ module Influxer
 
     def since(val)
       where("time > #{val.to_i}s")
+    end
+
+    private
+
+    def build_fill(val)
+      return if val.nil?
+      fill(FILL_RESERVED.include?(val) ? val.to_s : val.to_i)
     end
   end
 end

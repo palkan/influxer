@@ -1,46 +1,43 @@
 require 'spec_helper'
 
 describe Influxer::Client do
-  after(:each) do
-    Rails.cache.clear
-  end
-
   let(:conf) { Influxer.config }
-  let(:client) { Influxer.client }
+  subject { Influxer.client }
 
-  it "should have config params" do
-    expect(client.username).to eq conf.username
-    expect(client.port).to eq conf.port
-    expect(client.database).to eq conf.database
+  describe "#initialize" do
+    it "sets config database value" do
+      expect(subject.config.database).to eq conf.database
+    end
+
+    it "passes config params" do
+      conf.username = 'admin'
+      conf.port = 2222
+      expect(subject.config.username).to eq 'admin'
+      expect(subject.config.port).to eq 2222
+    end
   end
 
-  describe "cache" do
-    before do
-      allow_any_instance_of(Influxer::Client).to receive(:query) do |_, sql|
-        sql
-      end
-    end
-
+  describe "cache", :query do
     let(:q) { "list series" }
+    after { Rails.cache.clear }
 
-    after(:each) do
-      conf.cache = false
-    end
-
-    it "should write data to cache" do
+    it "writes data to cache" do
       conf.cache = {}
 
-      client.cached_query(q)
+      subject.query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
     end
 
     it "should write data to cache with expiration" do
-      conf.cache = { expires_in: 1 }
+      conf.cache = { expires_in: 90 }
 
-      client.cached_query(q)
+      subject.query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
 
-      sleep 2
+      Timecop.travel(1.minute.from_now)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
+
+      Timecop.travel(2.minutes.from_now)
       expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
     end
   end
