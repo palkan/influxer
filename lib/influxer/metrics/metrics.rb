@@ -23,8 +23,8 @@ module Influxer
         *(
           [
             :write, :write!, :select, :where,
-            :group, :merge, :time, :past, :since,
-            :limit, :fill, :delete_all
+            :group, :time, :past, :since,
+            :limit, :offset, :fill, :delete_all
           ] + Influxer::Calculations::CALCULATION_METHODS
         ),
         to: :all
@@ -49,6 +49,10 @@ module Influxer
         attributes(*attrs)
         self.tag_names ||= []
         self.tag_names += attrs.map(&:to_s)
+      end
+
+      def tag?(name)
+        tag_names.include?(name.to_s)
       end
 
       def inherited(subclass)

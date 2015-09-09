@@ -31,9 +31,9 @@ describe Influxer::Relation, :query do
 
     it "merge single values" do
       r1 = rel.time(:hour, fill: 0).limit(10)
-      r2 = Influxer::Relation.new(DummyMetrics).merge(:doomy).limit(5)
+      r2 = Influxer::Relation.new(DummyMetrics).group(:dummy_id).offset(10).limit(5)
       r1.merge!(r2)
-      expect(r1.to_sql).to eq "select * from \"dummy\" merge \"doomy\" group by time(1h) fill(0) limit 5"
+      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h),dummy_id fill(0) limit 5 offset 10"
     end
   end
 
@@ -51,6 +51,10 @@ describe Influxer::Relation, :query do
 
       it "select string" do
         expect(rel.select("count(user_id)").to_sql).to eq "select count(user_id) from \"dummy\""
+      end
+
+      it "select expression" do
+        expect(rel.select("(value + 6) / 10").to_sql).to eq "select (value + 6) / 10 from \"dummy\""
       end
     end
 
@@ -75,6 +79,16 @@ describe Influxer::Relation, :query do
       it "handle arrays" do
         expect(rel.where(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id=1 or user_id=2 or user_id=3)"
       end
+
+      context "with tags" do
+        it "integer tag values" do
+          expect(rel.where(dummy_id: 10).to_sql).to eq "select * from \"dummy\" where (dummy_id='10')"
+        end
+
+        it "array tag values" do
+          expect(rel.where(dummy_id: [10, 'some']).to_sql).to eq "select * from \"dummy\" where (dummy_id='10' or dummy_id='some')"
+        end
+      end
     end
 
     describe "#not" do
@@ -92,16 +106,6 @@ describe Influxer::Relation, :query do
 
       it "handle arrays" do
         expect(rel.where.not(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id<>1 and user_id<>2 and user_id<>3)"
-      end
-    end
-
-    describe "#merge" do
-      it "merge with one series" do
-        expect(rel.merge("dubby").to_sql).to eq "select * from \"dummy\" merge \"dubby\""
-      end
-
-      it "merge with one series as regexp" do
-        expect(rel.merge(/^du[1-6]+$/).to_sql).to eq "select * from \"dummy\" merge /^du[1-6]+$/"
       end
     end
 
@@ -172,18 +176,38 @@ describe Influxer::Relation, :query do
         expect(rel.time("4d").to_sql).to eq "select * from \"dummy\" group by time(4d)"
       end
 
-      it "group by time with string value and fill null" do
-        expect(rel.time("4d", fill: :null).to_sql).to eq "select * from \"dummy\" group by time(4d) fill(null)"
+      %w(null previous none).each do |val|
+        it "group by time with string value and fill #{val}" do
+          expect(rel.time("4d", fill: val.to_sym).to_sql).to eq "select * from \"dummy\" group by time(4d) fill(#{val})"
+        end
       end
 
-      it "group by time and other fields with fill null" do
+      it "group by time and other fields with fill zero" do
         expect(rel.time("4d", fill: 0).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d),dummy_id fill(0)"
+      end
+
+      it "group by time and other fields with fill negative" do
+        expect(rel.time("4d", fill: -1).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d),dummy_id fill(-1)"
       end
     end
 
     describe "#limit" do
       it "generate valid limit" do
         expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100"
+      end
+
+      it "generate valid limit for the whole measurement" do
+        expect(rel.limit(100, true).to_sql).to eq "select * from \"dummy\" slimit 100"
+      end
+    end
+
+    describe "#offset" do
+      it "generate valid offset" do
+        expect(rel.limit(100).offset(10).to_sql).to eq "select * from \"dummy\" limit 100 offset 10"
+      end
+
+      it "generate valid offset for the whole measurement" do
+        expect(rel.offset(10, true).to_sql).to eq "select * from \"dummy\" soffset 10"
       end
     end
 
@@ -192,7 +216,7 @@ describe Influxer::Relation, :query do
         [
           :count, :min, :max, :mean,
           :mode, :median, :distinct, :derivative,
-          :stddev, :sum, :first, :last, :difference, :histogram
+          :stddev, :sum, :first, :last
         ].each do |method|
           describe "##{method}" do
             specify do
@@ -203,16 +227,13 @@ describe Influxer::Relation, :query do
         end
       end
 
-      context "two args calculation methods" do
-        [
-          :percentile, :histogram, :top, :bottom
-        ].each do |method|
-          describe "##{method}" do
-            specify do
-              expect(rel.where(user_id: 1).calc(method, :column_name, 10).to_sql)
-                .to eq "select #{method}(column_name,10) from \"dummy\" where (user_id=1)"
-            end
-          end
+      context "with aliases" do
+        it "select count as alias" do
+          expect(rel.count(:val, 'total').to_sql).to eq "select count(val) as total from \"dummy\""
+        end
+
+        it "select percentile as alias" do
+          expect(rel.percentile(:val, 90, 'p1').to_sql).to eq "select percentile(val,90) as p1 from \"dummy\""
         end
       end
     end
@@ -233,10 +254,14 @@ describe Influxer::Relation, :query do
   end
 
   describe "#delete_all" do
-    it do
-      Timecop.freeze(Time.now)
-      expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).delete_all)
-        .to eq "delete from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)"
+    it "without tags" do
+      expect(rel.delete_all)
+        .to eq "drop series from \"dummy\""
+    end
+
+    it "with tags" do
+      expect(rel.where(dummy_id: 1, host: 'eu').delete_all)
+        .to eq "drop series from \"dummy\" where (dummy_id='1') and (host='eu')"
     end
   end
 

@@ -17,7 +17,7 @@ describe Influxer::Metrics, :query do
 
     specify { is_expected.to respond_to :all }
     specify { is_expected.to respond_to :where }
-    specify { is_expected.to respond_to :merge }
+    specify { is_expected.to respond_to :offset }
     specify { is_expected.to respond_to :time }
     specify { is_expected.to respond_to :past }
     specify { is_expected.to respond_to :since }
