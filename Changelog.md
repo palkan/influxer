@@ -1,3 +1,10 @@
+## 0.3.1
+- Add order, soffset, slimit methods to Relation
+- Fix query statements order
+
+## 0.3.0
+- Upgrade to InfluxDB 0.9.x
+
 ## 0.2.3
 - Parse fanout queries points to handle _fanouted_ values
 - Add Rubocop config and cleanup code style
