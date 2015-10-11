@@ -42,14 +42,14 @@ describe Influxer::Metrics, :query do
 
     it "works with several defaults" do
       expect(dappy.where(user_id: 1).to_sql)
-        .to eq "select * from \"dummy\" group by time(1h) where (user_id=1) limit 100"
+        .to eq "select * from \"dummy\" where (user_id=1) group by time(1h) limit 100"
     end
   end
 
   describe "named scope" do
     it "works with named scope" do
       expect(doomy.by_user(1).to_sql)
-        .to eq "select * from \"dummy\" group by time(1h) where (user_id=1) limit 100"
+        .to eq "select * from \"dummy\" where (user_id=1) group by time(1h) limit 100"
     end
 
     it "works with named scope with empty relation" do
@@ -58,7 +58,7 @@ describe Influxer::Metrics, :query do
 
     it "works with several scopes" do
       expect(doomy.where(dummy_id: 100).by_user([1, 2, 3]).daily.to_sql)
-        .to eq "select * from \"dummy\" group by time(1d) where (dummy_id=100) and (user_id=1 or user_id=2 or user_id=3) limit 100"
+        .to eq "select * from \"dummy\" where (dummy_id=100) and (user_id=1 or user_id=2 or user_id=3) group by time(1d) limit 100"
     end
   end
 end

@@ -12,7 +12,7 @@ module Influxer
 
     attr_reader :values
 
-    MULTI_VALUE_METHODS = [:select, :where, :group]
+    MULTI_VALUE_METHODS = [:select, :where, :group, :order]
 
     MULTI_KEY_METHODS = [:fanout]
 
@@ -20,9 +20,7 @@ module Influxer
 
     MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
 
-    SINGLE_VALUE_SIMPLE_METHODS = [:fill]
-
-    LIMIT_METHODS = [:limit, :offset]
+    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :offset, :slimit, :soffset]
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -63,16 +61,6 @@ module Influxer
           #{name}_values.concat args.map(&:to_s)    #  select_values.concat args.map(&:to_s)
           self                                      #  self
         end                                         # end
-      CODE
-    end
-
-    LIMIT_METHODS.each do |name|
-      class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}(val, measurement = false)         # def limit(val, measurement = false)
-          @values[:#{name}] = val                     #   @values[:limit] = val
-          @values[:s#{name}] = measurement ? 's' : '' #   @values[:slimit] = measurement ? 's' : ''
-          self                                        #   self
-        end                                           # end
       CODE
     end
 
@@ -121,6 +109,16 @@ module Influxer
       @values[:normalized] == true
     end
 
+    def order(val)
+      case val
+      when Hash
+        val.each { |k, v| order_values << "#{k} #{v}" }
+      when String
+        order_values << val
+      end
+      self
+    end
+
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/MethodLength
@@ -133,6 +131,8 @@ module Influxer
 
       sql << "from #{build_series_name}"
 
+      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
+
       unless group_values.empty? && time_value.nil?
         group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
         group_fields.uniq!
@@ -141,10 +141,12 @@ module Influxer
 
       sql << "fill(#{fill_value})" unless fill_value.nil?
 
-      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
+      sql << "order by #{order_values.uniq.join(',')}" unless order_values.empty?
 
-      sql << "#{slimit_value}limit #{limit_value}" unless limit_value.nil?
-      sql << "#{soffset_value}offset #{offset_value}" unless offset_value.nil?
+      sql << "limit #{limit_value}" unless limit_value.nil?
+      sql << "offset #{offset_value}" unless offset_value.nil?
+      sql << "slimit #{slimit_value}" unless slimit_value.nil?
+      sql << "soffset #{soffset_value}" unless soffset_value.nil?
       sql.join " "
     end
     # rubocop:enable Metrics/AbcSize

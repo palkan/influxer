@@ -24,20 +24,22 @@ describe Influxer::Relation, :query do
   describe "#merge!" do
     it "merge multi values" do
       r1 = rel.where(id: [1, 2], dummy: 'qwe').time(:hour)
-      r2 = Influxer::Relation.new(DummyMetrics).where.not(user_id: 0).group(:user_id)
+      r2 = Influxer::Relation.new(DummyMetrics).where.not(user_id: 0).group(:user_id).order(user_id: :asc)
       r1.merge!(r2)
-      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h),user_id where (id=1 or id=2) and (dummy='qwe') and (user_id<>0)"
+      expect(r1.to_sql)
+        .to eq "select * from \"dummy\" where (id=1 or id=2) and (dummy='qwe') and (user_id<>0) " \
+               "group by time(1h),user_id order by user_id asc"
     end
 
     it "merge single values" do
-      r1 = rel.time(:hour, fill: 0).limit(10)
-      r2 = Influxer::Relation.new(DummyMetrics).group(:dummy_id).offset(10).limit(5)
+      r1 = rel.time(:hour, fill: 0).slimit(10)
+      r2 = Influxer::Relation.new(DummyMetrics).group(:dummy_id).offset(10).slimit(5)
       r1.merge!(r2)
-      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h),dummy_id fill(0) limit 5 offset 10"
+      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h),dummy_id fill(0) offset 10 slimit 5"
     end
   end
 
-  describe "sql generation" do
+  context "sql generation" do
     describe "#from" do
       it "generates valid from if no conditions" do
         expect(rel.to_sql).to eq "select * from \"dummy\""
@@ -152,7 +154,11 @@ describe Influxer::Relation, :query do
         end
 
         it "group by millisecond" do
-          expect(rel.time(:ms).to_sql).to eq "select * from \"dummy\" group by time(1u)"
+          expect(rel.time(:ms).to_sql).to eq "select * from \"dummy\" group by time(1ms)"
+        end
+
+        it "group by microsecond" do
+          expect(rel.time(:u).to_sql).to eq "select * from \"dummy\" group by time(1u)"
         end
 
         it "group by day" do
@@ -191,13 +197,25 @@ describe Influxer::Relation, :query do
       end
     end
 
+    describe "#order" do
+      it "generate valid order" do
+        expect(rel.order(time_spent: :asc).to_sql).to eq "select * from \"dummy\" order by time_spent asc"
+      end
+
+      it "generate order from string" do
+        expect(rel.order('cpu desc, val asc').to_sql).to eq "select * from \"dummy\" order by cpu desc, val asc"
+      end
+    end
+
     describe "#limit" do
       it "generate valid limit" do
         expect(rel.limit(100).to_sql).to eq "select * from \"dummy\" limit 100"
       end
+    end
 
-      it "generate valid limit for the whole measurement" do
-        expect(rel.limit(100, true).to_sql).to eq "select * from \"dummy\" slimit 100"
+    describe "#slimit" do
+      it "generate valid slimit" do
+        expect(rel.slimit(100).to_sql).to eq "select * from \"dummy\" slimit 100"
       end
     end
 
@@ -205,13 +223,15 @@ describe Influxer::Relation, :query do
       it "generate valid offset" do
         expect(rel.limit(100).offset(10).to_sql).to eq "select * from \"dummy\" limit 100 offset 10"
       end
+    end
 
-      it "generate valid offset for the whole measurement" do
-        expect(rel.offset(10, true).to_sql).to eq "select * from \"dummy\" soffset 10"
+    describe "#soffset" do
+      it "generate valid soffset" do
+        expect(rel.soffset(10).to_sql).to eq "select * from \"dummy\" soffset 10"
       end
     end
 
-    describe "calculations" do
+    context "calculations" do
       context "one arg calculation methods" do
         [
           :count, :min, :max, :mean,
@@ -235,6 +255,26 @@ describe Influxer::Relation, :query do
         it "select percentile as alias" do
           expect(rel.percentile(:val, 90, 'p1').to_sql).to eq "select percentile(val,90) as p1 from \"dummy\""
         end
+      end
+    end
+
+    context "complex queries" do
+      it "group + where" do
+        expect(rel.count('user_id').group(:traffic_source).fill(0).where(user_id: 123).past('28d').to_sql)
+          .to eq "select count(user_id) from \"dummy\" where (user_id=123) and (time > now() - 28d) " \
+                 "group by traffic_source fill(0)"
+      end
+
+      it "where + group + order + limit" do
+        expect(rel.group(:user_id).where(account_id: 123).order(account_id: :desc).limit(10).offset(10).to_sql)
+          .to eq "select * from \"dummy\" where (account_id=123) group by user_id " \
+                 "order by account_id desc limit 10 offset 10"
+      end
+
+      it "offset + slimit" do
+        expect(rel.where(account_id: 123).slimit(10).offset(10).to_sql)
+          .to eq "select * from \"dummy\" where (account_id=123) " \
+                 "offset 10 slimit 10"
       end
     end
   end
