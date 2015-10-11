@@ -29,6 +29,10 @@ class Rails
     def logger
       @logger ||= Logger.new(nil)
     end
+
+    def env
+      'test'
+    end
   end
 end
 

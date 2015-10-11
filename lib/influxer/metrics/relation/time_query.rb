@@ -4,7 +4,8 @@ module Influxer
       hour: '1h',
       minute: '1m',
       second: '1s',
-      ms: '1u',
+      ms: '1ms',
+      u: '1u',
       week: '1w',
       day: '1d',
       month: '30d'
