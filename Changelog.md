@@ -1,3 +1,6 @@
+## 0.4.0
+- Rename default `time` attribute to `timestamp`
+
 ## 0.2.3
 - Parse fanout queries points to handle _fanouted_ values
 - Add Rubocop config and cleanup code style
