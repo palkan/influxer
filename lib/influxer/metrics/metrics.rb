@@ -162,7 +162,7 @@ module Influxer
       @attributes.select { |k, _| tag_names.include?(k.to_s) }
     end
 
-    attributes :time
+    attributes :timestamp
 
     private
 

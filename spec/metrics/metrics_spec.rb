@@ -61,7 +61,7 @@ describe Influxer::Metrics, :query do
       it "sets current time" do
         Timecop.freeze(Time.local(2015))
         dummy_metrics.write!
-        expect(dummy_metrics.time).to eq Time.local(2015)
+        expect(dummy_metrics.timestamp).to eq Time.local(2015).to_i
       end
     end
   end
