@@ -294,6 +294,15 @@ describe Influxer::Relation, :query do
   end
 
   describe "#delete_all" do
+    it "client expects to execute query method" do
+      expected_query = "drop series from \"dummy\""
+
+      expect(client)
+        .to receive(:query).with(expected_query)
+
+      rel.delete_all
+    end
+
     it "without tags" do
       expect(rel.delete_all)
         .to eq "drop series from \"dummy\""

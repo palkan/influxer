@@ -6,10 +6,5 @@ module Influxer
     def initialize
       super Influxer.config.as_json.symbolize_keys!
     end
-
-    # Public #execute
-    def exec(sql)
-      execute(sql)
-    end
   end
 end

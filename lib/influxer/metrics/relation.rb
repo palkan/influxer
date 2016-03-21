@@ -194,7 +194,7 @@ module Influxer
 
       sql = sql.join " "
 
-      @instance.client.exec sql
+      @instance.client.query sql
     end
 
     def scoping
