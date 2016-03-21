@@ -61,7 +61,7 @@ describe Influxer::Metrics, :query do
       it "sets current time" do
         Timecop.freeze(Time.local(2015))
         dummy_metrics.write!
-        expect(dummy_metrics.timestamp).to eq Time.local(2015).to_i
+        expect(dummy_metrics.timestamp).to eq Time.local(2015)
       end
     end
   end
@@ -181,12 +181,40 @@ describe Influxer::Metrics, :query do
 
     it "write data and return point" do
       expect(client)
-        .to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 })
+        .to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: nil)
 
       point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test')
       expect(point.persisted?).to be_truthy
       expect(point.user_id).to eq 1
       expect(point.dummy_id).to eq 2
+    end
+
+    it "test write data with time and return point" do
+      timestamp_test = Time.now
+      expected_time = (timestamp_test.to_r * 1_000_000_000).to_i
+
+      expect(client).
+        to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time)
+
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+      expect(point.persisted?).to be_truthy
+      expect(point.user_id).to eq 1
+      expect(point.dummy_id).to eq 2
+      expect(point.timestamp).to eq timestamp_test
+    end
+
+    it "test write data with string time" do
+      base_time = Time.now
+      timestamp_test = "#{base_time.to_s}"
+
+      expect(client).
+        to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: (base_time.to_i * 1_000_000_000).to_i)
+
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+      expect(point.persisted?).to be_truthy
+      expect(point.user_id).to eq 1
+      expect(point.dummy_id).to eq 2
+      expect(point.timestamp).to eq(timestamp_test)
     end
 
     it "doesn't write data and return false if invalid" do

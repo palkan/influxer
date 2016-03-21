@@ -7,6 +7,8 @@ shared_context "stub_query", :query do
       sql
     end
 
+    allow_any_instance_of(InfluxDB::Client).to receive(:time_precision)
+
     allow_any_instance_of(InfluxDB::Client).to receive(:post)
   end
 end
