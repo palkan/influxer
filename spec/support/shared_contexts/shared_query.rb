@@ -7,10 +7,6 @@ shared_context "stub_query", :query do
       sql
     end
 
-    allow_any_instance_of(Influxer::Client).to receive(:exec) do |_, sql|
-      sql
-    end
-
     allow_any_instance_of(InfluxDB::Client).to receive(:post)
   end
 end
