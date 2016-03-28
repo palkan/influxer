@@ -330,4 +330,41 @@ describe Influxer::Relation, :query do
       expect(rel.inspect).to eq "#<Influxer::Relation [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...]>"
     end
   end
+
+  describe "#epoch" do
+    it "format :h" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :h).and_return []
+      DummyMetrics.epoch(:h).all.to_a
+    end
+
+    it "format :m" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :m).and_return []
+      DummyMetrics.epoch(:m).all.to_a
+    end
+
+    it "format :s" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :s).and_return []
+      DummyMetrics.epoch(:s).all.to_a
+    end
+
+    it "format :ms" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :ms).and_return []
+      DummyMetrics.epoch(:ms).all.to_a
+    end
+
+    it "format :u" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :u).and_return []
+      DummyMetrics.epoch(:u).all.to_a
+    end
+
+    it "format :ns" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: :ns).and_return []
+      DummyMetrics.epoch(:ns).all.to_a
+    end
+
+    it "invalid epoch format" do
+      expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: nil).and_return []
+      DummyMetrics.epoch(:invalid).all.to_a
+    end
+  end
 end

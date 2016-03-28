@@ -12,6 +12,8 @@ module Influxer
 
     attr_reader :values
 
+    SUPPORTED_EPOCH_FORMAT = [:h, :m, :s, :ms, :u, :ns]
+
     MULTI_VALUE_METHODS = [:select, :where, :group, :order]
 
     MULTI_KEY_METHODS = [:fanout]
@@ -109,6 +111,13 @@ module Influxer
       @values[:normalized] == true
     end
 
+    def epoch(val)
+      return self unless SUPPORTED_EPOCH_FORMAT.include? val
+
+      @values[:epoch] = val
+      self
+    end
+
     def order(val)
       case val
       when Hash
@@ -180,7 +189,7 @@ module Influxer
     end
 
     def load
-      @records = get_points(@instance.client.query(to_sql, denormalize: !normalized?))
+      @records = get_points(@instance.client.query(to_sql, denormalize: !normalized?, epoch: @values[:epoch]))
       @loaded = true
       @records
     end

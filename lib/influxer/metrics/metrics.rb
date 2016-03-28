@@ -24,7 +24,7 @@ module Influxer
           [
             :write, :write!, :select, :where,
             :group, :time, :past, :since,
-            :limit, :offset, :fill, :delete_all
+            :limit, :offset, :fill, :delete_all, :epoch
           ] + Influxer::Calculations::CALCULATION_METHODS
         ),
         to: :all
