@@ -27,6 +27,7 @@ module Influxer
                 :udp,
                 :async,
                 database: 'db',
+                time_precision: 'ns',
                 cache: false
 
     def load

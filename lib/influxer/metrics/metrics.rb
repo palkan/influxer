@@ -9,6 +9,7 @@ module Influxer
   # Base class for InfluxDB querying and writing
   # rubocop:disable Metrics/ClassLength
   class Metrics
+    TIME_FACTOR = 1_000_000_000
     include ActiveModel::Model
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
@@ -108,6 +109,7 @@ module Influxer
     end
 
     delegate :tag_names, to: :class
+    attr_accessor :timestamp
 
     def initialize(attributes = {})
       @attributes = {}
@@ -132,7 +134,7 @@ module Influxer
     end
 
     def write_point
-      client.write_point unquote(series), values: values, tags: tags
+      client.write_point unquote(series), values: values, tags: tags, timestamp: parsed_timestamp
       @persisted = true
     end
 
@@ -162,9 +164,22 @@ module Influxer
       @attributes.select { |k, _| tag_names.include?(k.to_s) }
     end
 
-    attributes :timestamp
-
     private
+
+    def parsed_timestamp
+      return @timestamp unless client.time_precision == 'ns'
+
+      case @timestamp
+      when Numeric
+        @timestamp.to_i.to_s.ljust(19, '0').to_i
+      when String
+        (Time.parse(@timestamp).to_r * TIME_FACTOR).to_i
+      when Date
+        (@timestamp.to_time.to_r * TIME_FACTOR).to_i
+      when Time
+        (@timestamp.to_r * TIME_FACTOR).to_i
+      end
+    end
 
     def unquote(name)
       name.gsub(/(\A['"]|['"]\z)/, '')

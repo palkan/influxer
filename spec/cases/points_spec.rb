@@ -4,7 +4,7 @@ describe DummyMetrics do
   before do
     stub_request(:get, "http://localhost:8086/query")
       .with(
-        query: { q: 'select * from "dummy"', u: "root", p: "root", precision: 's', db: 'db' }
+        query: { q: 'select * from "dummy"', u: "root", p: "root", precision: 'ns', db: 'db' }
       )
       .to_return(body: fixture_file)
   end
