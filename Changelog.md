@@ -1,3 +1,7 @@
+## 0.5.0
+- Update `timestamp` support
+- Add `epoch` method
+
 ## 0.4.0
 - Rename default `time` attribute to `timestamp`
 
