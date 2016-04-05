@@ -32,6 +32,8 @@ module Influxer
 
     def build_eql(key, val, negate)
       case val
+      when NilClass
+        build_eql(key, /.*/, !negate)
       when Regexp
         "#{key}#{negate ? ' !~ ' : ' =~ '}#{val.inspect}"
       when Array

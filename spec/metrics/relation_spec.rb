@@ -94,6 +94,10 @@ describe Influxer::Relation, :query do
         it "array tag values" do
           expect(rel.where(dummy_id: [10, 'some']).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10' or dummy_id = 'some')"
         end
+
+        it "nil value" do
+          expect(rel.where(dummy_id: nil).to_sql).to eq "select * from \"dummy\" where (dummy_id !~ /.*/)"
+        end
       end
     end
 
@@ -112,6 +116,12 @@ describe Influxer::Relation, :query do
 
       it "handle arrays" do
         expect(rel.where.not(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id <> 1 and user_id <> 2 and user_id <> 3)"
+      end
+
+      context "with tags" do
+        it "nil value" do
+          expect(rel.not(dummy_id: nil).to_sql).to eq "select * from \"dummy\" where (dummy_id =~ /.*/)"
+        end
       end
     end
 

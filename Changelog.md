@@ -1,6 +1,7 @@
 ## master
 - Fix whitespace around operators
 - Add `Relation#from` method to redefine series
+- Handle nil values for tags in #where clause
 
 ## 0.5.0
 - Update `timestamp` support
