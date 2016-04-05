@@ -33,13 +33,13 @@ module Influxer
     def build_eql(key, val, negate)
       case val
       when Regexp
-        "#{key}#{negate ? '!~' : '=~'}#{val.inspect}"
+        "#{key}#{negate ? ' !~ ' : ' =~ '}#{val.inspect}"
       when Array
         build_in(key, val, negate)
       when Range
         build_range(key, val, negate)
       else
-        "#{key}#{negate ? '<>' : '='}#{quoted(val, key)}"
+        "#{key}#{negate ? ' <> ' : ' = '}#{quoted(val, key)}"
       end
     end
 
@@ -53,9 +53,9 @@ module Influxer
 
     def build_range(key, val, negate)
       if negate
-        "#{key}<#{quoted(val.begin)} and #{key}>#{quoted(val.end)}"
+        "#{key} < #{quoted(val.begin)} and #{key} > #{quoted(val.end)}"
       else
-        "#{key}>#{quoted(val.begin)} and #{key}<#{quoted(val.end)}"
+        "#{key} > #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
       end
     end
   end

@@ -27,15 +27,15 @@ describe Influxer::Relation, :query do
       r2 = Influxer::Relation.new(DummyMetrics).where.not(user_id: 0).group(:user_id).order(user_id: :asc)
       r1.merge!(r2)
       expect(r1.to_sql)
-        .to eq "select * from \"dummy\" where (id=1 or id=2) and (dummy='qwe') and (user_id<>0) " \
-               "group by time(1h),user_id order by user_id asc"
+        .to eq "select * from \"dummy\" where (id = 1 or id = 2) and (dummy = 'qwe') and (user_id <> 0) " \
+               "group by time(1h), user_id order by user_id asc"
     end
 
     it "merge single values" do
       r1 = rel.time(:hour, fill: 0).slimit(10)
       r2 = Influxer::Relation.new(DummyMetrics).group(:dummy_id).offset(10).slimit(5)
       r1.merge!(r2)
-      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h),dummy_id fill(0) offset 10 slimit 5"
+      expect(r1.to_sql).to eq "select * from \"dummy\" group by time(1h), dummy_id fill(0) offset 10 slimit 5"
     end
   end
 
@@ -48,7 +48,7 @@ describe Influxer::Relation, :query do
 
     describe "#select" do
       it "select array of symbols" do
-        expect(rel.select(:user_id, :dummy_id).to_sql).to eq "select user_id,dummy_id from \"dummy\""
+        expect(rel.select(:user_id, :dummy_id).to_sql).to eq "select user_id, dummy_id from \"dummy\""
       end
 
       it "select string" do
@@ -63,7 +63,7 @@ describe Influxer::Relation, :query do
     describe "#where" do
       it "sgenerate valid conditions from hash" do
         Timecop.freeze(Time.now)
-        expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy='q') and (timer=#{Time.now.to_i}s)"
+        expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy = 'q') and (timer = #{Time.now.to_i}s)"
       end
 
       it "generate valid conditions from strings" do
@@ -71,43 +71,43 @@ describe Influxer::Relation, :query do
       end
 
       it "handle regexps" do
-        expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id=1) and (dummy=~/^du.*/)"
+        expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy =~ /^du.*/)"
       end
 
       it "handle ranges" do
-        expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id>1 and user_id<4)"
+        expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id > 1 and user_id < 4)"
       end
 
       it "handle arrays" do
-        expect(rel.where(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id=1 or user_id=2 or user_id=3)"
+        expect(rel.where(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id = 1 or user_id = 2 or user_id = 3)"
       end
 
       context "with tags" do
         it "integer tag values" do
-          expect(rel.where(dummy_id: 10).to_sql).to eq "select * from \"dummy\" where (dummy_id='10')"
+          expect(rel.where(dummy_id: 10).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10')"
         end
 
         it "array tag values" do
-          expect(rel.where(dummy_id: [10, 'some']).to_sql).to eq "select * from \"dummy\" where (dummy_id='10' or dummy_id='some')"
+          expect(rel.where(dummy_id: [10, 'some']).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10' or dummy_id = 'some')"
         end
       end
     end
 
     describe "#not" do
       it "negate simple values" do
-        expect(rel.where.not(user_id: 1, dummy: :a).to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy<>'a')"
+        expect(rel.where.not(user_id: 1, dummy: :a).to_sql).to eq "select * from \"dummy\" where (user_id <> 1) and (dummy <> 'a')"
       end
 
       it "handle regexp" do
-        expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id<>1) and (dummy!~/^du.*/)"
+        expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id <> 1) and (dummy !~ /^du.*/)"
       end
 
       it "handle ranges" do
-        expect(rel.where.not(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id<1 and user_id>4)"
+        expect(rel.where.not(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id < 1 and user_id > 4)"
       end
 
       it "handle arrays" do
-        expect(rel.where.not(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id<>1 and user_id<>2 and user_id<>3)"
+        expect(rel.where.not(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id <> 1 and user_id <> 2 and user_id <> 3)"
       end
     end
 
@@ -137,7 +137,7 @@ describe Influxer::Relation, :query do
 
     describe "#group" do
       it "generate valid groups" do
-        expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from \"dummy\" group by user_id,time(1m) fill(0)"
+        expect(rel.group(:user_id, "time(1m) fill(0)").to_sql).to eq "select * from \"dummy\" group by user_id, time(1m) fill(0)"
       end
 
       context "group by time predefined values" do
@@ -189,11 +189,11 @@ describe Influxer::Relation, :query do
       end
 
       it "group by time and other fields with fill zero" do
-        expect(rel.time("4d", fill: 0).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d),dummy_id fill(0)"
+        expect(rel.time("4d", fill: 0).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d), dummy_id fill(0)"
       end
 
       it "group by time and other fields with fill negative" do
-        expect(rel.time("4d", fill: -1).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d),dummy_id fill(-1)"
+        expect(rel.time("4d", fill: -1).group(:dummy_id).to_sql).to eq "select * from \"dummy\" group by time(4d), dummy_id fill(-1)"
       end
     end
 
@@ -241,7 +241,7 @@ describe Influxer::Relation, :query do
           describe "##{method}" do
             specify do
               expect(rel.where(user_id: 1).calc(method, :column_name).to_sql)
-                .to eq "select #{method}(column_name) from \"dummy\" where (user_id=1)"
+                .to eq "select #{method}(column_name) from \"dummy\" where (user_id = 1)"
             end
           end
         end
@@ -253,7 +253,7 @@ describe Influxer::Relation, :query do
         end
 
         it "select percentile as alias" do
-          expect(rel.percentile(:val, 90, 'p1').to_sql).to eq "select percentile(val,90) as p1 from \"dummy\""
+          expect(rel.percentile(:val, 90, 'p1').to_sql).to eq "select percentile(val, 90) as p1 from \"dummy\""
         end
       end
     end
@@ -261,19 +261,19 @@ describe Influxer::Relation, :query do
     context "complex queries" do
       it "group + where" do
         expect(rel.count('user_id').group(:traffic_source).fill(0).where(user_id: 123).past('28d').to_sql)
-          .to eq "select count(user_id) from \"dummy\" where (user_id=123) and (time > now() - 28d) " \
+          .to eq "select count(user_id) from \"dummy\" where (user_id = 123) and (time > now() - 28d) " \
                  "group by traffic_source fill(0)"
       end
 
       it "where + group + order + limit" do
         expect(rel.group(:user_id).where(account_id: 123).order(account_id: :desc).limit(10).offset(10).to_sql)
-          .to eq "select * from \"dummy\" where (account_id=123) group by user_id " \
+          .to eq "select * from \"dummy\" where (account_id = 123) group by user_id " \
                  "order by account_id desc limit 10 offset 10"
       end
 
       it "offset + slimit" do
         expect(rel.where(account_id: 123).slimit(10).offset(10).to_sql)
-          .to eq "select * from \"dummy\" where (account_id=123) " \
+          .to eq "select * from \"dummy\" where (account_id = 123) " \
                  "offset 10 slimit 10"
       end
     end
@@ -310,7 +310,7 @@ describe Influxer::Relation, :query do
 
     it "with tags" do
       expect(rel.where(dummy_id: 1, host: 'eu').delete_all)
-        .to eq "drop series from \"dummy\" where (dummy_id='1') and (host='eu')"
+        .to eq "drop series from \"dummy\" where (dummy_id = '1') and (host = 'eu')"
     end
   end
 

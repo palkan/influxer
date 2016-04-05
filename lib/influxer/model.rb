@@ -16,11 +16,9 @@ module Influxer
         klass = params[:class_name].present? ? params[:class_name] : "#{self}Metrics"
         klass = klass.constantize
 
-        attrs = nil
-
         attrs = params[:inherits] if params[:inherits].present?
 
-        foreign_key = params.key?(:foreign_key) ? params[:foreign_key] : to_s.foreign_key
+        foreign_key = params.fetch(:foreign_key, to_s.foreign_key)
 
         define_method(metrics_name) do
           rel_attrs = foreign_key ? { foreign_key => id } : {}

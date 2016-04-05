@@ -136,7 +136,7 @@ module Influxer
       sql = ["select"]
       select_values << "*" if select_values.empty?
 
-      sql << select_values.uniq.join(",")
+      sql << select_values.uniq.join(", ")
 
       sql << "from #{build_series_name}"
 
@@ -145,7 +145,7 @@ module Influxer
       unless group_values.empty? && time_value.nil?
         group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
         group_fields.uniq!
-        sql << "group by #{group_fields.join(',')}"
+        sql << "group by #{group_fields.join(', ')}"
       end
 
       sql << "fill(#{fill_value})" unless fill_value.nil?
