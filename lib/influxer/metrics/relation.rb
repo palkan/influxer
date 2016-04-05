@@ -18,11 +18,11 @@ module Influxer
 
     MULTI_KEY_METHODS = [:fanout]
 
-    SINGLE_VALUE_METHODS = [:fill, :time, :limit, :offset, :slimit, :soffset, :normalized]
+    SINGLE_VALUE_METHODS = [:fill, :time, :limit, :offset, :slimit, :soffset, :from, :normalized]
 
     MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
 
-    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :offset, :slimit, :soffset]
+    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :offset, :slimit, :soffset, :from]
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -237,7 +237,7 @@ module Influxer
     protected
 
     def build_series_name
-      @instance.series
+      from_value.present? ? @klass.quoted_series(from_value) : @instance.series
     end
 
     def loaded?

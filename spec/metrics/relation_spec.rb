@@ -44,6 +44,10 @@ describe Influxer::Relation, :query do
       it "generates valid from if no conditions" do
         expect(rel.to_sql).to eq "select * from \"dummy\""
       end
+
+      it "generates sql using custom from clause" do
+        expect(rel.from(:doomy).to_sql).to eq "select * from \"doomy\""
+      end
     end
 
     describe "#select" do

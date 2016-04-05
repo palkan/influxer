@@ -1,3 +1,7 @@
+## master
+- Fix whitespace around operators
+- Add `Relation#from` method to redefine series
+
 ## 0.5.0
 - Update `timestamp` support
 - Add `epoch` method
