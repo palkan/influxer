@@ -30,6 +30,8 @@ module Influxer
       end
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/MethodLength
     def build_eql(key, val, negate)
       case val
       when NilClass
@@ -44,13 +46,15 @@ module Influxer
         "#{key}#{negate ? ' <> ' : ' = '}#{quoted(val, key)}"
       end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/MethodLength
 
     def build_in(key, arr, negate)
       buf = []
       arr.each do |val|
         buf << build_eql(key, val, negate)
       end
-      "#{buf.join(negate ? ' and ' : ' or ')}"
+      buf.join(negate ? ' and ' : ' or ').to_s
     end
 
     def build_range(key, val, negate)

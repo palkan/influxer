@@ -24,11 +24,11 @@ module Influxer
     #    Metrics.time("4d", fill: 0)
     #    # select * from metrics group by time(4d) fill(0)
     def time(val, options = {})
-      if val.is_a?(Symbol)
-        @values[:time] = TIME_ALIASES[val] || '1' + val.to_s
-      else
-        @values[:time] = val
-      end
+      @values[:time] = if val.is_a?(Symbol)
+                         TIME_ALIASES[val] || '1' + val.to_s
+                       else
+                         val
+                       end
 
       build_fill(options[:fill])
       self

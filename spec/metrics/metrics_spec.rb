@@ -193,8 +193,8 @@ describe Influxer::Metrics, :query do
       timestamp_test = Time.now
       expected_time = (timestamp_test.to_r * 1_000_000_000).to_i
 
-      expect(client).
-        to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time)
+      expect(client)
+        .to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time)
 
       point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
       expect(point.persisted?).to be_truthy
@@ -205,10 +205,10 @@ describe Influxer::Metrics, :query do
 
     it "test write data with string time" do
       base_time = Time.now
-      timestamp_test = "#{base_time.to_s}"
+      timestamp_test = base_time.to_s
 
-      expect(client).
-        to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: (base_time.to_i * 1_000_000_000).to_i)
+      expect(client)
+        .to receive(:write_point).with("dummies", tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: (base_time.to_i * 1_000_000_000).to_i)
 
       point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
       expect(point.persisted?).to be_truthy

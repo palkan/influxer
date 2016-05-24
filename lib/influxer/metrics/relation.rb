@@ -12,17 +12,17 @@ module Influxer
 
     attr_reader :values
 
-    SUPPORTED_EPOCH_FORMAT = [:h, :m, :s, :ms, :u, :ns]
+    SUPPORTED_EPOCH_FORMAT = %i(h m s ms u ns).freeze
 
-    MULTI_VALUE_METHODS = [:select, :where, :group, :order]
+    MULTI_VALUE_METHODS = %i(select where group order).freeze
 
-    MULTI_KEY_METHODS = [:fanout]
+    MULTI_KEY_METHODS = %i(fanout).freeze
 
-    SINGLE_VALUE_METHODS = [:fill, :time, :limit, :offset, :slimit, :soffset, :from, :normalized]
+    SINGLE_VALUE_METHODS = %i(fill time limit offset slimit soffset from normalized).freeze
 
-    MULTI_VALUE_SIMPLE_METHODS = [:select, :group]
+    MULTI_VALUE_SIMPLE_METHODS = %i(select group).freeze
 
-    SINGLE_VALUE_SIMPLE_METHODS = [:fill, :limit, :offset, :slimit, :soffset, :from]
+    SINGLE_VALUE_SIMPLE_METHODS = %i(fill limit offset slimit soffset from).freeze
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -100,7 +100,7 @@ module Influxer
       point
     end
 
-    alias_method :new, :build
+    alias new build
 
     def normalized
       @values[:normalized] = true
@@ -189,7 +189,11 @@ module Influxer
     end
 
     def load
-      @records = get_points(@instance.client.query(to_sql, denormalize: !normalized?, epoch: @values[:epoch]))
+      @records = get_points(
+        @instance.client.query(
+          to_sql,
+          denormalize: !normalized?,
+          epoch: @values[:epoch]))
       @loaded = true
       @records
     end
@@ -207,7 +211,8 @@ module Influxer
     end
 
     def scoping
-      previous, @klass.current_scope = @klass.current_scope, self
+      previous = @klass.current_scope
+      @klass.current_scope = self
       yield
     ensure
       @klass.current_scope = previous

@@ -40,7 +40,7 @@ module Influxer
             @attributes[name] = val
           end
 
-          define_method("#{name}") do
+          define_method(name.to_s) do
             @attributes[name]
           end
         end
@@ -102,7 +102,7 @@ module Influxer
             quoted_series(val.first)
           end
         else
-          '"' + val.to_s.gsub(/\"/) { %q(\") } + '"'
+          '"' + val.to_s.gsub(/\"/) { '\"' } + '"'
         end
       end
       # rubocop:enable Metrics/MethodLength
@@ -118,9 +118,9 @@ module Influxer
     end
 
     def write
-      fail MetricsError if self.persisted?
+      raise MetricsError if persisted?
 
-      return false if self.invalid?
+      return false if invalid?
 
       run_callbacks :write do
         write_point
@@ -129,7 +129,7 @@ module Influxer
     end
 
     def write!
-      fail MetricsInvalid if self.invalid?
+      raise MetricsInvalid if invalid?
       write
     end
 
@@ -166,6 +166,8 @@ module Influxer
 
     private
 
+    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
     def parsed_timestamp
       return @timestamp unless client.time_precision == 'ns'
 
@@ -180,6 +182,8 @@ module Influxer
         (@timestamp.to_r * TIME_FACTOR).to_i
       end
     end
+    # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize
 
     def unquote(name)
       name.gsub(/(\A['"]|['"]\z)/, '')

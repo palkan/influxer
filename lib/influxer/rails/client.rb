@@ -19,7 +19,7 @@ module Influxer
       res = yield
       duration = (Time.now - start_ts) * 1000
 
-      name  = "InfluxDB SQL (#{duration.round(1)}ms)"
+      name = "InfluxDB SQL (#{duration.round(1)}ms)"
 
       # bold black name and blue query string
       msg = "\e[1m\e[30m#{name}\e[0m  \e[34m#{sql}\e[0m"

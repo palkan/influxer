@@ -27,7 +27,7 @@ module Influxer
     class ScopeRegistry # :nodoc:
       extend ActiveSupport::PerThreadRegistry
 
-      VALID_SCOPE_TYPES = [:current_scope]
+      VALID_SCOPE_TYPES = [:current_scope].freeze
 
       def initialize
         @registry = Hash.new { |hash, key| hash[key] = {} }
@@ -49,7 +49,7 @@ module Influxer
 
       def raise_invalid_scope_type!(scope_type)
         return if VALID_SCOPE_TYPES.include?(scope_type)
-        fail ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
+        raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
         Scope types  must be included in VALID_SCOPE_TYPES"
       end
     end

@@ -7,7 +7,7 @@ module Influxer
 
       module ClassMethods
         def scope(name, scope)
-          fail "Scope not defined: #{name}" if scope.nil? || !scope.respond_to?(:call)
+          raise "Scope not defined: #{name}" if scope.nil? || !scope.respond_to?(:call)
           singleton_class.send(:define_method, name) do |*args|
             rel = all
             rel.merge!(rel.scoping { scope.call(*args) })
