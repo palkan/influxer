@@ -4,7 +4,4 @@ gem 'sqlite3', platform: :mri
 gem 'activerecord-jdbcsqlite3-adapter', platform: :jruby
 gem 'activerecord', '~> 4.2.0'
 
-# TEMP
-gem 'influxdb', github: 'influxdb/influxdb-ruby'
-
 gemspec path: '..'

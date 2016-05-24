@@ -2,7 +2,5 @@ language: ruby
 cache: bundler
 matrix:
   include:
-    - rvm: 2.2.2
-      gemfile: gemfiles/rails42.gemfile
     - rvm: 2.3.0
       gemfile: gemfiles/rails42.gemfile
