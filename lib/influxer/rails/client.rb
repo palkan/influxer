@@ -3,7 +3,7 @@ module Influxer
   # - Add cache support for queries
   class Client
     def query(sql, options = {})
-      log(sql) do
+      log_sql(sql) do
         if !options.fetch(:cache, true) || Influxer.config.cache == false
           super(sql, options)
         else
@@ -12,7 +12,7 @@ module Influxer
       end
     end
 
-    def log(sql)
+    def log_sql(sql)
       return yield unless logger.debug?
 
       start_ts = Time.now

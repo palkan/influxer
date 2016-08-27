@@ -1,4 +1,7 @@
-## master
+## 0.5.2
+- Fix bug with query logging
+
+## 0.5.1
 - Fix whitespace around operators
 - Add `Relation#from` method to redefine series
 - Handle nil values for tags in #where clause
