@@ -1,3 +1,6 @@
+## 0.5.3
+- Fix `where.not` with ranges typo
+
 ## 0.5.2
 - Fix bug with query logging
 
