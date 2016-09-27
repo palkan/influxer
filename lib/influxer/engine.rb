@@ -7,5 +7,9 @@ module Influxer
         ActiveRecord::Base.send :include, Influxer::Model
       end
     end
+
+    initializer "set InfluxDB logger" do |_app|
+      InfluxDB::Logging.logger = Rails.logger
+    end
   end
 end

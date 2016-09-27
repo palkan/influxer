@@ -59,7 +59,7 @@ module Influxer
 
     def build_range(key, val, negate)
       if negate
-        "#{key} < #{quoted(val.begin)} and #{key} > #{quoted(val.end)}"
+        "#{key} < #{quoted(val.begin)} or #{key} > #{quoted(val.end)}"
       else
         "#{key} > #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
       end
