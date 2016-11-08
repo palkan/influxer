@@ -33,6 +33,7 @@ module Influxer
 
       attr_reader :series
       attr_accessor :tag_names
+      attr_accessor :retention_policy
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -59,6 +60,10 @@ module Influxer
       def inherited(subclass)
         subclass.set_series
         subclass.tag_names = tag_names.nil? ? [] : tag_names.dup
+      end
+
+      def set_retention_policy(policy_name)
+        @retention_policy = policy_name
       end
 
       # rubocop:disable Metrics/MethodLength
@@ -102,9 +107,18 @@ module Influxer
             quoted_series(val.first)
           end
         else
-          '"' + val.to_s.gsub(/\"/) { '\"' } + '"'
+          if retention_policy.present?
+            [quote(@retention_policy), quote(val)].join('.')
+          else
+            quote(val)
+          end
         end
       end
+
+      def quote(name)
+        '"' + name.to_s.gsub(/\"/) { '\"' } + '"'
+      end
+
       # rubocop:enable Metrics/MethodLength
     end
 

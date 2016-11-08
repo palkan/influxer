@@ -11,6 +11,7 @@ describe Influxer::Metrics, :query do
 
     specify { is_expected.to respond_to :attributes }
     specify { is_expected.to respond_to :set_series }
+    specify { is_expected.to respond_to :set_retention_policy }
     specify { is_expected.to respond_to :series }
     specify { is_expected.to respond_to :write }
     specify { is_expected.to respond_to :write! }
@@ -135,6 +136,26 @@ describe Influxer::Metrics, :query do
 
       m = dummy_with_proc_series.new user_id: 2, test_id: 123
       expect(m.series).to eq "\"test/123/user/2\""
+    end
+  end
+
+  describe "#quoted_series" do
+    context "with retention policy" do
+      let(:dummy_with_retention_policy) do
+        Class.new(described_class) do
+          attributes :user_id, :test_id
+          set_series :dummies
+          set_retention_policy :week
+        end
+      end
+
+      it "sets retention policy" do
+        expect(dummy_with_retention_policy.retention_policy).to eq :week
+      end
+
+      it "sets quoted series with retention policy" do
+        expect(dummy_with_retention_policy.quoted_series).to eq "\"week\".\"dummies\""
+      end
     end
   end
 
