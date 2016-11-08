@@ -1,3 +1,6 @@
+## 0.5.4
+- Add `set_retention_policy` method
+
 ## 0.5.3
 - Fix `where.not` with ranges typo
 
