@@ -32,7 +32,18 @@ describe Influxer::Metrics, :query do
     specify { is_expected.to respond_to :write! }
     specify { is_expected.to respond_to :persisted? }
     specify { is_expected.to respond_to :series }
-    specify { is_expected.to be_a ActiveModel::Model }
+    if Influxer.active_model3?
+      specify { is_expected.to be_a Influxer::ActiveModel3::Model }
+    else
+      specify { is_expected.to be_a ActiveModel::Model }
+    end
+  end
+
+  describe "#initialize" do
+    it "assigns initial values in constructor" do
+      m = DummyMetrics.new(dummy_id: 1)
+      expect(m.dummy_id).to eq 1
+    end
   end
 
   describe "#write" do

@@ -1,5 +1,6 @@
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
+require 'influxer/metrics/active_model3/model'
 require 'active_model'
 
 module Influxer
@@ -10,7 +11,13 @@ module Influxer
   # rubocop:disable Metrics/ClassLength
   class Metrics
     TIME_FACTOR = 1_000_000_000
-    include ActiveModel::Model
+
+    if Influxer.active_model3?
+      include Influxer::ActiveModel3::Model
+    else
+      include ActiveModel::Model
+    end
+
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
 
@@ -122,7 +129,6 @@ module Influxer
       # rubocop:enable Metrics/MethodLength
     end
 
-    delegate :tag_names, to: :class
     attr_accessor :timestamp
 
     def initialize(attributes = {})
@@ -176,6 +182,10 @@ module Influxer
     # Returns hash with metrics tags
     def tags
       @attributes.select { |k, _| tag_names.include?(k.to_s) }
+    end
+
+    def tag_names
+      self.class.tag_names
     end
 
     private
