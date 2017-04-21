@@ -2,6 +2,10 @@ require 'influxer/version'
 
 # Rails client for InfluxDB
 module Influxer
+  def self.active_model3?
+    ActiveModel::VERSION::MAJOR == 3
+  end
+
   require 'influxer/config'
   require 'influxer/client'
   require 'influxer/metrics/metrics'
