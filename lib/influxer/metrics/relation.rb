@@ -274,8 +274,13 @@ module Influxer
 
     def get_points(list)
       return list if normalized?
-      list.reduce([]) do |a, e|
-        a + e.fetch("values", []).map { |v| inject_tags(v, e["tags"] || {}) }
+      list.reduce([]) do |memo, element|
+        memo + element.fetch('values', []).map do |value|
+          data_as_hash = inject_tags(value, element['tags'] || {})
+
+          influxer_obj = Struct.new(*data_as_hash.keys.map(&:to_sym))
+          influxer_obj.new(*data_as_hash.values)
+        end
       end
     end
 
