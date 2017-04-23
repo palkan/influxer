@@ -1,7 +1,6 @@
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
 require 'influxer/metrics/active_model3/model'
-require 'active_model'
 
 module Influxer
   class MetricsError < StandardError; end
