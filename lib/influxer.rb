@@ -1,4 +1,5 @@
 require 'influxer/version'
+require 'active_model'
 
 # Rails client for InfluxDB
 module Influxer
