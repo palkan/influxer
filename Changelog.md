@@ -1,3 +1,9 @@
+# Change log
+
+## 1.0.1
+
+- Fix missing `#delegate` in ActiveRecord 3.2
+
 ## 0.5.4
 - Add `set_retention_policy` method
 
