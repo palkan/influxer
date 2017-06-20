@@ -1,4 +1,4 @@
-require 'anyway'
+require 'anyway_config'
 
 module Influxer
   # Influxer configuration
