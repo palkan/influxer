@@ -1,3 +1,4 @@
+require 'active_support/core_ext/module/delegation'
 require 'influxer/metrics/relation/time_query'
 require 'influxer/metrics/relation/calculations'
 require 'influxer/metrics/relation/where_clause'
