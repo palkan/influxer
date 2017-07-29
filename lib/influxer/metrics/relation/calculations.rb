@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   module Calculations #:nodoc:
     CALCULATION_METHODS =

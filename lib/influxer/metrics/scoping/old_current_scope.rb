@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   module Scoping
     # Clone of current_scope methods for older versions of ActiveModel

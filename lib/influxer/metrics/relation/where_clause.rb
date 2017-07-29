@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   module WhereClause #:nodoc:
     # accepts hash or strings conditions
@@ -14,10 +16,9 @@ module Influxer
     protected
 
     def build_where(args, hargs, negate)
-      case
-      when (args.present? && args[0].is_a?(String))
-        where_values.concat args.map { |str| "(#{str})" }
-      when hargs.present?
+      if args.present? && args[0].is_a?(String)
+        where_values.concat(args.map { |str| "(#{str})" })
+      elsif hargs.present?
         build_hash_where(hargs, negate)
       else
         false

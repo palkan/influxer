@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DummyMetrics < Influxer::Metrics # :nodoc:
   tags :dummy_id, :host
   attributes :user_id

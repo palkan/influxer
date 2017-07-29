@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_context "stub_query", :query do
   let(:client) { Influxer.client }
 

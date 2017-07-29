@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Influxer::Relation, :query do
@@ -196,7 +198,7 @@ describe Influxer::Relation, :query do
         expect(rel.time("4d").to_sql).to eq "select * from \"dummy\" group by time(4d)"
       end
 
-      %w(null previous none).each do |val|
+      %w[null previous none].each do |val|
         it "group by time with string value and fill #{val}" do
           expect(rel.time("4d", fill: val.to_sym).to_sql).to eq "select * from \"dummy\" group by time(4d) fill(#{val})"
         end

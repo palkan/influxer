@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
 require 'influxer/metrics/active_model3/model'
@@ -110,6 +112,8 @@ module Influxer
       end
 
       # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
       def quoted_series(val = @series, instance = nil, write: false)
         case val
         when Regexp
@@ -136,7 +140,8 @@ module Influxer
       def quote(name)
         '"' + name.to_s.gsub(/\"/) { '\"' } + '"'
       end
-
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/MethodLength
     end
 
@@ -170,12 +175,9 @@ module Influxer
         tags: tags,
         timestamp: parsed_timestamp
       }
-      client.write_point(
+      write_with_config(
         unquote(series(write: true)),
-        data,
-        self.class.precision,
-        self.class.retention_policy,
-        self.class.database
+        data
       )
       @persisted = true
     end
@@ -211,6 +213,13 @@ module Influxer
     end
 
     private
+
+    def write_with_config(series, data)
+      client.write_point(series, data,
+                         self.class.precision,
+                         self.class.retention_policy,
+                         self.class.database)
+    end
 
     # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/AbcSize

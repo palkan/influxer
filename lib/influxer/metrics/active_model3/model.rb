@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   module ActiveModel3
     # Replacement of ActiveModel::Model for ActiveModel 3

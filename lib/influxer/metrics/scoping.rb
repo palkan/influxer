@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'influxer/metrics/scoping/default'
 require 'influxer/metrics/scoping/named'
 

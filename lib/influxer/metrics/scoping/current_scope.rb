@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'active_support/per_thread_registry'
 
 module Influxer
   module Scoping
-    module CurrentScope
+    module CurrentScope # :nodoc:
       # Clone of current_scope methods for newer versions of ActiveModel
       def current_scope
         ScopeRegistry.value_for(:current_scope, name)

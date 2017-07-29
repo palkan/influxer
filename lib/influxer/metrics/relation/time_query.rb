@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   module TimeQuery #:nodoc:
     TIME_ALIASES = {
@@ -11,7 +13,7 @@ module Influxer
       month: '30d'
     }.freeze
 
-    FILL_RESERVED = %i(null previous none).freeze
+    FILL_RESERVED = %i[null previous none].freeze
 
     # Add group value to relation. To be used instead of `group("time(...)").
     # Accepts symbols and strings.

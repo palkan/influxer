@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Influxer::Metrics, :query do
@@ -21,7 +23,7 @@ describe Influxer::Metrics, :query do
 
   let(:doomy) do
     Class.new(dappy) do
-      scope :by_user, -> (id) { where(user_id: id) if id.present? }
+      scope :by_user, ->(id) { where(user_id: id) if id.present? }
       scope :hourly, -> { time(:hour) }
       scope :daily, -> { time(:day) }
     end

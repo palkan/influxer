@@ -1,4 +1,6 @@
-$:.push File.expand_path("../lib", __FILE__)
+# frozen_string_literal: true
+
+$LOAD_PATH.push File.expand_path("../lib", __FILE__)
 
 require "influxer/version"
 
@@ -12,7 +14,7 @@ Gem::Specification.new do |s|
   s.description = "InfluxDB the Rails way"
   s.license     = "MIT"
 
-  s.files         = `git ls-files`.split($/)
+  s.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   s.require_paths = ["lib"]
 
   s.add_dependency "activemodel", '>= 3.2.0'
@@ -27,4 +29,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-byebug'
   s.add_development_dependency "rspec", ">= 3.1.0"
   s.add_development_dependency "webmock", "~> 2.1"
+  s.add_development_dependency "rubocop", "~> 0.49"
 end

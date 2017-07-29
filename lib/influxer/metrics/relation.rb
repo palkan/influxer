@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support/core_ext/module/delegation'
 require 'influxer/metrics/relation/time_query'
 require 'influxer/metrics/relation/calculations'
@@ -13,17 +15,17 @@ module Influxer
 
     attr_reader :values
 
-    SUPPORTED_EPOCH_FORMAT = %i(h m s ms u ns).freeze
+    SUPPORTED_EPOCH_FORMAT = %i[h m s ms u ns].freeze
 
-    MULTI_VALUE_METHODS = %i(select where group order).freeze
+    MULTI_VALUE_METHODS = %i[select where group order].freeze
 
-    MULTI_KEY_METHODS = %i(fanout).freeze
+    MULTI_KEY_METHODS = %i[fanout].freeze
 
-    SINGLE_VALUE_METHODS = %i(fill time limit offset slimit soffset from normalized).freeze
+    SINGLE_VALUE_METHODS = %i[fill time limit offset slimit soffset from normalized].freeze
 
-    MULTI_VALUE_SIMPLE_METHODS = %i(select group).freeze
+    MULTI_VALUE_SIMPLE_METHODS = %i[select group].freeze
 
-    SINGLE_VALUE_SIMPLE_METHODS = %i(fill limit offset slimit soffset from).freeze
+    SINGLE_VALUE_SIMPLE_METHODS = %i[fill limit offset slimit soffset from].freeze
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -194,7 +196,9 @@ module Influxer
         @instance.client.query(
           to_sql,
           denormalize: !normalized?,
-          epoch: @values[:epoch]))
+          epoch: @values[:epoch]
+        )
+      )
       @loaded = true
       @records
     end
@@ -287,6 +291,11 @@ module Influxer
     def method_missing(method, *args, &block)
       return super unless @klass.respond_to?(method)
       merge!(scoping { @klass.public_send(method, *args, &block) })
+    end
+
+    def respond_to_missing?(method, *args)
+      return true if @klass.respond_to?(method)
+      super
     end
   end
 end

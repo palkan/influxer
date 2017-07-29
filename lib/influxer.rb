@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'influxer/version'
 require 'active_model'
 

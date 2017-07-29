@@ -7,11 +7,22 @@ AllCops:
   Exclude:
     - 'bin/**/*'
     - 'spec/dummy/**/*'
+    - 'vendor/**/*'
+    - 'gemfiles/vendor/**/*'
+    - Gemfile
+    - Rakefile
   DisplayCopNames: true
   StyleGuideCopsOnly: false
+  TargetRubyVersion: 2.3
 
 Rails:
-  Enabled: true
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
 
 Style/AccessorMethodName:
   Enabled: false
@@ -35,6 +46,10 @@ Style/BlockDelimiters:
 
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
 
 Metrics/MethodLength:
   Exclude:

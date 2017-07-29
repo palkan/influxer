@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VisitsMetrics < Influxer::Metrics
   set_retention_policy :yearly
 

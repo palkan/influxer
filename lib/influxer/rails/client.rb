@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Influxer
   # - Overriding loggging (use instrumentation and Rails logger)
   # - Add cache support for queries
