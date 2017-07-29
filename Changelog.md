@@ -1,5 +1,29 @@
 # Change log
 
+## 1.1.0
+
+### Features
+
+- Add ability to specify per-metrics retention-policy, precision and database
+
+Now you can override default configuration for a specific metrics class:
+
+```ruby
+class CustomMetrics < Influxer::Metrics
+  set_database "custom_db"
+  set_retention_policy :yearly
+  set_precision "ms"
+end
+```
+
+### Fixes
+
+- [Fixes #30] Fix writing points with custom retention policy
+
+### Misc
+
+- Update Rubocop configuration and add Rubocop Rake task to defaults
+
 ## 1.0.1
 
 - Fix missing `#delegate` in ActiveRecord 3.2
