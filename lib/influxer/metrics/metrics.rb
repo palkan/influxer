@@ -37,9 +37,8 @@ module Influxer
         to: :all
       )
 
-      attr_reader :series
+      attr_reader :series, :retention_policy, :database, :precision
       attr_accessor :tag_names
-      attr_accessor :retention_policy
 
       def attributes(*attrs)
         attrs.each do |name|
@@ -68,8 +67,19 @@ module Influxer
         subclass.tag_names = tag_names.nil? ? [] : tag_names.dup
       end
 
+      # Use custom retention policy
       def set_retention_policy(policy_name)
         @retention_policy = policy_name
+      end
+
+      # Use custom database for this metrics
+      def set_database(database)
+        @database = database
+      end
+
+      # Use custom precision for this metrics
+      def set_precision(precision)
+        @precision = precision
       end
 
       # rubocop:disable Metrics/MethodLength
@@ -100,20 +110,22 @@ module Influxer
       end
 
       # rubocop:disable Metrics/MethodLength
-      def quoted_series(val = @series, instance = nil)
+      def quoted_series(val = @series, instance = nil, write: false)
         case val
         when Regexp
           val.inspect
         when Proc
-          quoted_series(val.call(instance))
+          quoted_series(val.call(instance), write: write)
         when Array
           if val.length > 1
-            "merge(#{val.map { |s| quoted_series(s) }.join(',')})"
+            "merge(#{val.map { |s| quoted_series(s, write: write) }.join(',')})"
           else
-            quoted_series(val.first)
+            quoted_series(val.first, write: write)
           end
         else
-          if retention_policy.present?
+          # Only add retention policy when selecting points
+          # and not writing
+          if !write && retention_policy.present?
             [quote(@retention_policy), quote(val)].join('.')
           else
             quote(val)
@@ -153,7 +165,18 @@ module Influxer
     end
 
     def write_point
-      client.write_point unquote(series), values: values, tags: tags, timestamp: parsed_timestamp
+      data = {
+        values: values,
+        tags: tags,
+        timestamp: parsed_timestamp
+      }
+      client.write_point(
+        unquote(series(write: true)),
+        data,
+        self.class.precision,
+        self.class.retention_policy,
+        self.class.database
+      )
       @persisted = true
     end
 
@@ -161,8 +184,8 @@ module Influxer
       @persisted
     end
 
-    def series
-      self.class.quoted_series(self.class.series, self)
+    def series(**options)
+      self.class.quoted_series(self.class.series, self, **options)
     end
 
     def client

@@ -26,5 +26,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'activerecord', '>= 3.2.0'
   s.add_development_dependency 'pry-byebug'
   s.add_development_dependency "rspec", ">= 3.1.0"
-  s.add_development_dependency "webmock", "~> 1.21.0"
+  s.add_development_dependency "webmock", "~> 2.1"
 end

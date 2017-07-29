@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-fdescribe User do
+describe User do
   let(:user) { described_class.create age: 20, gender: 1, email: 'user@example.com' }
   subject { user }
 

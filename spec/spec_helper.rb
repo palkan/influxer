@@ -45,8 +45,17 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:'
 Dir["#{File.dirname(__FILE__)}/support/metrics/*.rb"].each { |f| require f }
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
+WebMock.disable_net_connect!
+
 RSpec.configure do |config|
   config.mock_with :rspec
+
+  config.example_status_persistence_file_path = "tmp/rspec_examples.txt"
+  config.filter_run :focus
+  config.run_all_when_everything_filtered = true
+
+  config.order = :random
+  Kernel.srand config.seed
 
   config.after(:each) { Influxer.reset! }
   config.after(:each) { Timecop.return }
