@@ -11,7 +11,7 @@ module Influxer
   class Relation
     include Influxer::TimeQuery
     include Influxer::Calculations
-    include Influxer::WhereClause
+    prepend Influxer::WhereClause
 
     attr_reader :values
 
@@ -256,7 +256,7 @@ module Influxer
 
     def reset
       @values = {}
-      @records = nil
+      @records = []
       @loaded = false
       self
     end

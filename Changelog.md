@@ -1,5 +1,11 @@
 # Change log
 
+## 1.1.1
+
+- [Fixes [#31](https://github.com/palkan/influxer/issues/31)] Fix bug with empty arrays in `where` clause
+
+- Introduce `Relation#none` method
+
 ## 1.1.0
 
 ### Features
@@ -18,7 +24,7 @@ end
 
 ### Fixes
 
-- [Fixes #30] Fix writing points with custom retention policy
+- [Fixes [#30](https://github.com/palkan/influxer/issues/30)] Fix writing points with custom retention policy
 
 ### Misc
 

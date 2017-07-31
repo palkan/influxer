@@ -13,6 +13,25 @@ module Influxer
       self
     end
 
+    def none
+      where_values << "(#{build_none})"
+      self
+    end
+
+    def loaded?
+      @null_relation || super
+    end
+
+    def reset
+      super
+      @null_relation = false
+    end
+
+    def load
+      return if @null_relation
+      super
+    end
+
     protected
 
     def build_where(args, hargs, negate)
@@ -40,6 +59,7 @@ module Influxer
       when Regexp
         "#{key}#{negate ? ' !~ ' : ' =~ '}#{val.inspect}"
       when Array
+        return build_none if val.empty?
         build_in(key, val, negate)
       when Range
         build_range(key, val, negate)
@@ -64,6 +84,11 @@ module Influxer
       else
         "#{key} > #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
       end
+    end
+
+    def build_none
+      @null_relation = true
+      build_eql(1, 0, false)
     end
   end
 end

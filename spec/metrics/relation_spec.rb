@@ -88,6 +88,11 @@ describe Influxer::Relation, :query do
         expect(rel.where(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id = 1 or user_id = 2 or user_id = 3)"
       end
 
+      it "handle empty arrays", :aggregate_failures do
+        expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.to_a).to eq []
+      end
+
       context "with tags" do
         it "integer tag values" do
           expect(rel.where(dummy_id: 10).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10')"
@@ -120,10 +125,28 @@ describe Influxer::Relation, :query do
         expect(rel.where.not(user_id: [1, 2, 3]).to_sql).to eq "select * from \"dummy\" where (user_id <> 1 and user_id <> 2 and user_id <> 3)"
       end
 
+      it "handle empty arrays", :aggregate_failures do
+        expect(rel.where.not(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.to_a).to eq []
+      end
+
       context "with tags" do
         it "nil value" do
           expect(rel.not(dummy_id: nil).to_sql).to eq "select * from \"dummy\" where (dummy_id =~ /.*/)"
         end
+      end
+    end
+
+    describe "#none" do
+      it "returns empty array", :aggregate_failures do
+        expect(rel.none.to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.to_a).to eq []
+      end
+
+      it "works with chaining", :aggregate_failures do
+        expect(rel.none.where.not(user_id: 1, dummy: :a).to_sql)
+          .to eq "select * from \"dummy\" where (1 = 0) and (user_id <> 1) and (dummy <> 'a')"
+        expect(rel.to_a).to eq []
       end
     end
 
