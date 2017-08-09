@@ -1,4 +1,4 @@
-[![Gem Version](https://badge.fury.io/rb/influxer.svg)](https://rubygems.org/gems/influxer) [![Build Status](https://travis-ci.org/palkan/influxer.svg?branch=master)](https://travis-ci.org/palkan/influxer)
+[![Gem Version](https://badge.fury.io/rb/influxer.svg)](https://rubygems.org/gems/influxer) [![Build Status](https://travis-ci.org/palkan/influxer.svg?branch=master)](https://travis-ci.org/palkan/influxer) [![Dependency Status](https://dependencyci.com/github/palkan/influxer/badge)](https://dependencyci.com/github/palkan/influxer)
 ## Influxer
 
 **NOTE**: Version 0.3.x supports InfluxDB >= 0.9.0. For InfluxDB 0.8.x use [version 0.2.5](https://github.com/palkan/influxer/tree/0.2.5).
