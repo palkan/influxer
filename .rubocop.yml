@@ -24,7 +24,7 @@ Style/SymbolArray:
 Style/SafeNavigation:
   Enabled: false
 
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: false
 
 Style/TrivialAccessors:
@@ -37,12 +37,15 @@ Style/Documentation:
 Style/StringLiterals: 
   Enabled: false
 
-Style/SpaceInsideStringInterpolation:
+Naming/SpaceInsideStringInterpolation:
   EnforcedStyle: no_space
 
 Style/BlockDelimiters:
   Exclude:
     - 'spec/**/*.rb'
+
+Lint/MissingCopEnableDirective:
+  Enabled: false
 
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
@@ -64,4 +67,7 @@ Rails/Date:
   Enabled: false
 
 Rails/TimeZone:
+  Enabled: false
+
+Gemspec/OrderedDependencies:
   Enabled: false

@@ -8,7 +8,7 @@ module Influxer
     extend ActiveSupport::Concern
 
     module ClassMethods # :nodoc:
-      # rubocop:disable Style/PredicateName
+      # rubocop:disable Naming/PredicateName
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def has_metrics(*args, **params)

@@ -13,11 +13,13 @@ module Influxer
   class Metrics
     TIME_FACTOR = 1_000_000_000
 
+    # rubocop:disable Style/MixinUsage
     if Influxer.active_model3?
       include Influxer::ActiveModel3::Model
     else
       include ActiveModel::Model
     end
+    # rubocop:enable Style/MixinUsage
 
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
@@ -89,11 +91,12 @@ module Influxer
       def set_series(*args)
         if args.empty?
           matches = to_s.match(/^(.*)Metrics$/)
-          if matches.nil?
-            @series = superclass.respond_to?(:series) ? superclass.series : to_s.underscore
-          else
-            @series = matches[1].split("::").join("_").underscore
-          end
+          @series =
+            if matches.nil?
+              superclass.respond_to?(:series) ? superclass.series : to_s.underscore
+            else
+              matches[1].split("::").join("_").underscore
+            end
         elsif args.first.is_a?(Proc)
           @series = args.first
         else
