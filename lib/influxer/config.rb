@@ -32,7 +32,7 @@ module Influxer
                 time_precision: 'ns',
                 cache: false
 
-    def load
+    def load(*)
       super
       # we want pass @cache value as options to cache store, so we want it to be a Hash
       @cache = {}.with_indifferent_access if @cache == true
