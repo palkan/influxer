@@ -80,8 +80,12 @@ describe Influxer::Relation, :query do
         expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy =~ /^du.*/)"
       end
 
-      it "handle ranges" do
-        expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id > 1 and user_id < 4)"
+      it "handle inclusive ranges" do
+        expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id >= 1 and user_id <= 4)"
+      end
+
+      it "handle exclusive range" do
+        expect(rel.where(user_id: 1...4).to_sql).to eq "select * from \"dummy\" where (user_id >= 1 and user_id < 4)"
       end
 
       it "handle arrays" do
@@ -117,8 +121,12 @@ describe Influxer::Relation, :query do
         expect(rel.where.not(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id <> 1) and (dummy !~ /^du.*/)"
       end
 
-      it "handle ranges" do
+      it "handle inclusive ranges" do
         expect(rel.where.not(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id < 1 or user_id > 4)"
+      end
+
+      it "handle exclusive ranges" do
+        expect(rel.where.not(user_id: 1...4).to_sql).to eq "select * from \"dummy\" where (user_id < 1 or user_id >= 4)"
       end
 
       it "handle arrays" do
