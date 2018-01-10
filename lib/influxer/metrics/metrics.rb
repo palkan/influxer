@@ -2,6 +2,7 @@
 
 require 'influxer/metrics/relation'
 require 'influxer/metrics/scoping'
+require 'influxer/metrics/quoting/timestamp'
 require 'influxer/metrics/active_model3/model'
 
 module Influxer
@@ -25,6 +26,7 @@ module Influxer
     extend ActiveModel::Callbacks
 
     include Influxer::Scoping
+    include Influxer::TimestampQuoting
 
     define_model_callbacks :write
 
@@ -227,18 +229,7 @@ module Influxer
     # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/AbcSize
     def parsed_timestamp
-      return @timestamp unless client.time_precision == 'ns'
-
-      case @timestamp
-      when Numeric
-        @timestamp.to_i.to_s.ljust(19, '0').to_i
-      when String
-        (Time.parse(@timestamp).to_r * TIME_FACTOR).to_i
-      when Date
-        (@timestamp.to_time.to_r * TIME_FACTOR).to_i
-      when Time
-        (@timestamp.to_r * TIME_FACTOR).to_i
-      end
+      quote_timestamp @timestamp, client
     end
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
