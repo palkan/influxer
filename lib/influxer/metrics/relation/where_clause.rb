@@ -78,6 +78,7 @@ module Influxer
       buf.join(negate ? ' and ' : ' or ').to_s
     end
 
+    # rubocop: disable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
     def build_range(key, val, negate)
       if val.exclude_end?
         # begin...end range
@@ -95,6 +96,7 @@ module Influxer
         end
       end
     end
+    # rubocop: enable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
 
     def build_none
       @null_relation = true

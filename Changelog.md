@@ -1,5 +1,21 @@
 # Change log
 
+## master
+
+## 1.1.2
+
+- Support exclusive ranges as `where` arguments. ([@MPursche][])
+
+```ruby
+# range including the end
+where(a: 1..4)
+#=> ... WHERE a >= 1 AND a <= 4
+
+#range excluding the end
+where(a: 1...4)
+#=> ... WHERE a >= 1 AND a < 4
+```
+
 ## 1.1.1
 
 - [Fixes [#31](https://github.com/palkan/influxer/issues/31)] Fix bug with empty arrays in `where` clause
@@ -82,3 +98,6 @@ end
 - Add cache support (using `Rails.cache`)
 - Scopes (default and named)
 - Support for fanout series
+
+[@palkan]: https://github.com/palkan
+[@MPursche]: https://github.com/MPursche
