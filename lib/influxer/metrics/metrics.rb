@@ -13,8 +13,6 @@ module Influxer
   # rubocop:disable Metrics/ClassLength
   class Metrics
     TIME_FACTOR = 1_000_000_000
-
-    # rubocop:disable Style/MixinUsage
     if Influxer.active_model3?
       include Influxer::ActiveModel3::Model
     else
@@ -226,8 +224,6 @@ module Influxer
                          self.class.database)
     end
 
-    # rubocop:disable Metrics/MethodLength
-    # rubocop:disable Metrics/AbcSize
     def parsed_timestamp
       quote_timestamp @timestamp, client
     end
