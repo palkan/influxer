@@ -80,12 +80,11 @@ describe Influxer::Relation, :query do
         expect(rel.where(user_id: 1, dummy: /^du.*/).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy =~ /^du.*/)"
       end
 
-
-      it "handle dates" do        
+      it "handle dates" do
         expect(rel.where(timer: Date.new(2015)).to_sql).to eq "select * from \"dummy\" where (timer = #{(Date.new(2015).to_time.to_r * 1_000_000_000).to_i})"
       end
 
-      it "handle date times" do        
+      it "handle date times" do
         expect(rel.where(timer: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (timer = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i})"
       end
 
