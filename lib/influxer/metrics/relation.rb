@@ -4,6 +4,7 @@ require 'active_support/core_ext/module/delegation'
 require 'influxer/metrics/relation/time_query'
 require 'influxer/metrics/relation/calculations'
 require 'influxer/metrics/relation/where_clause'
+require 'influxer/metrics/quoting/timestamp'
 
 module Influxer
   # Relation is used to build queries
@@ -11,6 +12,7 @@ module Influxer
   class Relation
     include Influxer::TimeQuery
     include Influxer::Calculations
+    include Influxer::TimestampQuoting
     prepend Influxer::WhereClause
 
     attr_reader :values
@@ -269,8 +271,8 @@ module Influxer
     def quoted(val, key = nil)
       if val.is_a?(String) || val.is_a?(Symbol) || @klass.tag?(key)
         "'#{val}'"
-      elsif val.is_a?(Time) || val.is_a?(DateTime)
-        "#{val.to_i}s"
+      elsif val.is_a?(Time) || val.is_a?(Date) || val.is_a?(DateTime)
+        quote_timestamp val, @instance.client
       else
         val.to_s
       end
