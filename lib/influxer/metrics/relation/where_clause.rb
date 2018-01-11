@@ -79,10 +79,20 @@ module Influxer
     end
 
     def build_range(key, val, negate)
-      if negate
-        "#{key} < #{quoted(val.begin)} or #{key} > #{quoted(val.end)}"
+      if val.exclude_end?
+        # begin...end range
+        if negate
+          "#{key} < #{quoted(val.begin)} or #{key} >= #{quoted(val.end)}"
+        else
+          "#{key} >= #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
+        end
       else
-        "#{key} > #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
+        # begin..end range
+        if negate
+          "#{key} < #{quoted(val.begin)} or #{key} > #{quoted(val.end)}"
+        else
+          "#{key} >= #{quoted(val.begin)} and #{key} <= #{quoted(val.end)}"
+        end
       end
     end
 
