@@ -268,17 +268,15 @@ module Influxer
       self
     end
 
-    # rubocop: disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def quoted(val, key = nil)
       if val.is_a?(String) || val.is_a?(Symbol) || @klass.tag?(key)
         "'#{val}'"
-      elsif val.is_a?(Time) || val.is_a?(Date) || val.is_a?(DateTime)
+      elsif key.to_s == "time"
         quote_timestamp val, @instance.client
       else
         val.to_s
       end
     end
-    # rubocop: enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     def get_points(list)
       return list if normalized?

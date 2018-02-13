@@ -2,24 +2,48 @@
 
 module Influxer
   module TimestampQuoting #:nodoc:
-    TIME_FACTOR = 1_000_000_000
+    TIME_FACTORS = {
+      'ns' => 1_000_000_000,
+      'ms' => 1_000,
+      's' => 1
+    }.freeze
 
-    # Quote timestamp as ns
-    # rubocop: disable Metrics/AbcSize, Metrics/MethodLength
+    # Quote timestamp
+    # rubocop: disable Metrics/MethodLength
     def quote_timestamp(val, client)
-      return val unless client.time_precision == 'ns'
+      return quote_timestamp_ns(val) if Influxer.config.time_duration_suffix_enabled
 
+      if !TIME_FACTORS.keys.include?(client.time_precision) &&
+         !val.is_a?(Numeric)
+        warn(
+          "Influxer doesn't automatically cast Time and String values " \
+          "to '#{client.time_precision}' precision. " \
+          "Please, convert to numeric value yourself"
+        )
+        return val
+      end
+
+      factor = TIME_FACTORS.fetch(client.time_precision)
+
+      factorize_timestamp(val, factor)
+    end
+    # rubocop: enable Metrics/MethodLength
+
+    def quote_timestamp_ns(val)
+      "#{factorize_timestamp(val, TIME_FACTORS.fetch('ns'))}ns"
+    end
+
+    def factorize_timestamp(val, factor)
       case val
       when Numeric
-        val.to_i.to_s.ljust(19, '0').to_i
+        (val.to_f * factor).to_i
       when String
-        (Time.parse(val).to_r * TIME_FACTOR).to_i
+        (Time.parse(val).to_r * factor).to_i
       when Date, DateTime
-        (val.to_time.to_r * TIME_FACTOR).to_i
+        (val.to_time.to_r * factor).to_i
       when Time
-        (val.to_r * TIME_FACTOR).to_i
+        (val.to_r * factor).to_i
       end
     end
-    # rubocop: enable Metrics/AbcSize, Metrics/MethodLength
   end
 end
