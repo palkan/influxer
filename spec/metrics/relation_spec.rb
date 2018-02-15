@@ -69,7 +69,7 @@ describe Influxer::Relation, :query do
     describe "#where" do
       it "generate valid conditions from hash" do
         Timecop.freeze(Time.now)
-        expect(rel.where(user_id: 1, dummy: 'q', timer: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy = 'q') and (timer = #{(Time.now.to_r * 1_000_000_000).to_i})"
+        expect(rel.where(user_id: 1, dummy: 'q', time: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy = 'q') and (time = #{(Time.now.to_r * 1_000_000_000).to_i})"
       end
 
       it "generate valid conditions from strings" do
@@ -81,11 +81,11 @@ describe Influxer::Relation, :query do
       end
 
       it "handle dates" do
-        expect(rel.where(timer: Date.new(2015)).to_sql).to eq "select * from \"dummy\" where (timer = #{(Date.new(2015).to_time.to_r * 1_000_000_000).to_i})"
+        expect(rel.where(time: Date.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(Date.new(2015).to_time.to_r * 1_000_000_000).to_i})"
       end
 
       it "handle date times" do
-        expect(rel.where(timer: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (timer = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i})"
+        expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i})"
       end
 
       it "handle inclusive ranges" do
@@ -103,6 +103,58 @@ describe Influxer::Relation, :query do
       it "handle empty arrays", :aggregate_failures do
         expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
         expect(rel.to_a).to eq []
+      end
+
+      context "with timestamp duration" do
+        around do |ex|
+          old_duration = Influxer.config.time_duration_suffix_enabled
+          Influxer.config.time_duration_suffix_enabled = true
+          ex.run
+          Influxer.config.time_duration_suffix_enabled = old_duration
+        end
+
+        it "adds ns suffix to times" do
+          expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
+        end
+
+        context "with different time_precision" do
+          around do |ex|
+            old_precision = Influxer.config.time_precision
+            Influxer.config.time_precision = 's'
+            ex.run
+            Influxer.config.time_precision = old_precision
+          end
+
+          it "adds s suffix to times" do
+            expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i}s)"
+          end
+        end
+
+        context "with unsupported time_precision" do
+          around do |ex|
+            old_precision = Influxer.config.time_precision
+            Influxer.config.time_precision = 'h'
+            ex.run
+            Influxer.config.time_precision = old_precision
+          end
+
+          it "casts to ns with suffix" do
+            expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
+          end
+        end
+      end
+
+      context "with different time_precision" do
+        around do |ex|
+          old_precision = Influxer.config.time_precision
+          Influxer.config.time_precision = 's'
+          ex.run
+          Influxer.config.time_precision = old_precision
+        end
+
+        it "casts to correct numeric representation" do
+          expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i})"
+        end
       end
 
       context "with tags" do
