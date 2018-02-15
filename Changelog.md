@@ -2,6 +2,8 @@
 
 ## master
 
+## 1.1.4
+
 - [Fixes [#35](https://github.com/palkan/influxer/issues/35)] Support time duration suffix and handle `'s'` and `'ms'` precisions. ([@palkan][])
 
   [PR](https://github.com/palkan/influxer/pull/36)
