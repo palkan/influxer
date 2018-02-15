@@ -116,6 +116,32 @@ describe Influxer::Relation, :query do
         it "adds ns suffix to times" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
         end
+
+        context "with different time_precision" do
+          around do |ex|
+            old_precision = Influxer.config.time_precision
+            Influxer.config.time_precision = 's'
+            ex.run
+            Influxer.config.time_precision = old_precision
+          end
+
+          it "adds s suffix to times" do
+            expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i}s)"
+          end
+        end
+
+        context "with unsupported time_precision" do
+          around do |ex|
+            old_precision = Influxer.config.time_precision
+            Influxer.config.time_precision = 'h'
+            ex.run
+            Influxer.config.time_precision = old_precision
+          end
+
+          it "casts to ns with suffix" do
+            expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
+          end
+        end
       end
 
       context "with different time_precision" do
@@ -126,7 +152,7 @@ describe Influxer::Relation, :query do
           Influxer.config.time_precision = old_precision
         end
 
-        it "adds ns suffix to times" do
+        it "casts to correct numeric representation" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i})"
         end
       end

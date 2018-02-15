@@ -8,10 +8,19 @@ module Influxer
       's' => 1
     }.freeze
 
+    DEFAULT_PRECISION = 'ns'
+
     # Quote timestamp
-    # rubocop: disable Metrics/MethodLength
+    # rubocop: disable Metrics/MethodLength, Metrics/AbcSize
     def quote_timestamp(val, client)
-      return quote_timestamp_ns(val) if Influxer.config.time_duration_suffix_enabled
+      if Influxer.config.time_duration_suffix_enabled
+        precision = if TIME_FACTORS.keys.include?(client.time_precision)
+                      client.time_precision
+                    else
+                      DEFAULT_PRECISION
+                    end
+        return quote_timestamp_with_suffix(val, precision)
+      end
 
       if !TIME_FACTORS.keys.include?(client.time_precision) &&
          !val.is_a?(Numeric)
@@ -23,14 +32,12 @@ module Influxer
         return val
       end
 
-      factor = TIME_FACTORS.fetch(client.time_precision)
-
-      factorize_timestamp(val, factor)
+      factorize_timestamp(val, TIME_FACTORS.fetch(client.time_precision))
     end
-    # rubocop: enable Metrics/MethodLength
+    # rubocop: enable Metrics/MethodLength, Metrics/AbcSize
 
-    def quote_timestamp_ns(val)
-      "#{factorize_timestamp(val, TIME_FACTORS.fetch('ns'))}ns"
+    def quote_timestamp_with_suffix(val, precision)
+      "#{factorize_timestamp(val, TIME_FACTORS.fetch(precision))}#{precision}"
     end
 
     def factorize_timestamp(val, factor)
