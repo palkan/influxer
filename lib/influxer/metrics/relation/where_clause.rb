@@ -83,16 +83,16 @@ module Influxer
       if val.exclude_end?
         # begin...end range
         if negate
-          "#{key} < #{quoted(val.begin)} or #{key} >= #{quoted(val.end)}"
+          "#{key} < #{quoted(val.begin, key)} or #{key} >= #{quoted(val.end, key)}"
         else
-          "#{key} >= #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
+          "#{key} >= #{quoted(val.begin, key)} and #{key} < #{quoted(val.end, key)}"
         end
       else
         # begin..end range
         if negate
-          "#{key} < #{quoted(val.begin)} or #{key} > #{quoted(val.end)}"
+          "#{key} < #{quoted(val.begin, key)} or #{key} > #{quoted(val.end, key)}"
         else
-          "#{key} >= #{quoted(val.begin)} and #{key} <= #{quoted(val.end)}"
+          "#{key} >= #{quoted(val.begin, key)} and #{key} <= #{quoted(val.end, key)}"
         end
       end
     end

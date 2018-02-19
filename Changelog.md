@@ -1,6 +1,7 @@
 # Change log
 
 ## master
+- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again
 
 ## 1.1.4
 
