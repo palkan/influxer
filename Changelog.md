@@ -1,7 +1,10 @@
 # Change log
 
 ## master
-- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again
+
+## 1.1.5
+
+- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again. ([@jklimke][])
 
 ## 1.1.4
 
@@ -110,3 +113,4 @@ end
 
 [@palkan]: https://github.com/palkan
 [@MPursche]: https://github.com/MPursche
+[@jklimke]: https://github.com/jklimke
