@@ -88,6 +88,14 @@ describe Influxer::Relation, :query do
         expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i})"
       end
 
+      it "handle date ranges" do
+        expect(rel.where(time: Date.new(2015)..Date.new(2016)).to_sql).to eq "select * from \"dummy\" where (time >= #{(Date.new(2015).to_time.to_r * 1_000_000_000).to_i} and time <= #{(Date.new(2016).to_time.to_r * 1_000_000_000).to_i})"
+      end
+
+      it "handle date time ranges" do
+        expect(rel.where(time: DateTime.new(2015)..DateTime.new(2016)).to_sql).to eq "select * from \"dummy\" where (time >= #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i} and time <= #{(DateTime.new(2016).to_time.to_r * 1_000_000_000).to_i})"
+      end
+
       it "handle inclusive ranges" do
         expect(rel.where(user_id: 1..4).to_sql).to eq "select * from \"dummy\" where (user_id >= 1 and user_id <= 4)"
       end
