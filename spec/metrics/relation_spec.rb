@@ -427,6 +427,17 @@ describe Influxer::Relation, :query do
       expect(rel.where(dummy_id: 1, host: 'eu').delete_all)
         .to eq "drop series from \"dummy\" where (dummy_id = '1') and (host = 'eu')"
     end
+
+    it "with time" do
+      expect(rel.where(time: Time.parse("2018-01-01T12:00:00.000Z")).delete_all)
+        .to eq("delete from \"dummy\" where (time = 1514808000000000000)")
+    end
+
+    it "with time range" do
+      range = Time.parse("2018-01-01T12:00:00.000Z")..Time.parse("2018-01-02T12:00:00.000Z")
+      expect(rel.where(time: range).delete_all)
+        .to eq("delete from \"dummy\" where (time >= 1514808000000000000 and time <= 1514894400000000000)")
+    end
   end
 
   describe "#inspect" do

@@ -102,5 +102,11 @@ module Influxer
       @null_relation = true
       build_eql(1, 0, false)
     end
+
+    def where_contains_time?      
+      where_values.any? do |where_clause|
+        /time( )/ === where_clause
+      end
+    end
   end
 end
