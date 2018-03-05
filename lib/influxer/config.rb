@@ -30,7 +30,8 @@ module Influxer
                 :async,
                 database: 'db',
                 time_precision: 'ns',
-                cache: false
+                cache: false,
+                time_duration_suffix_enabled: false
 
     def load(*)
       super

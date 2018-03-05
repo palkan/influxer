@@ -271,7 +271,7 @@ module Influxer
     def quoted(val, key = nil)
       if val.is_a?(String) || val.is_a?(Symbol) || @klass.tag?(key)
         "'#{val}'"
-      elsif val.is_a?(Time) || val.is_a?(Date) || val.is_a?(DateTime)
+      elsif key.to_s == "time"
         quote_timestamp val, @instance.client
       else
         val.to_s

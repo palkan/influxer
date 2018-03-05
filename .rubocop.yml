@@ -37,6 +37,10 @@ Style/Documentation:
 Style/StringLiterals: 
   Enabled: false
 
+Style/DateTime:
+  Exclude:
+    - 'spec/**/*.rb'
+
 Naming/SpaceInsideStringInterpolation:
   EnforcedStyle: no_space
 

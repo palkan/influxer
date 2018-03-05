@@ -78,23 +78,25 @@ module Influxer
       buf.join(negate ? ' and ' : ' or ').to_s
     end
 
+    # rubocop: disable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
     def build_range(key, val, negate)
       if val.exclude_end?
         # begin...end range
         if negate
-          "#{key} < #{quoted(val.begin)} or #{key} >= #{quoted(val.end)}"
+          "#{key} < #{quoted(val.begin, key)} or #{key} >= #{quoted(val.end, key)}"
         else
-          "#{key} >= #{quoted(val.begin)} and #{key} < #{quoted(val.end)}"
+          "#{key} >= #{quoted(val.begin, key)} and #{key} < #{quoted(val.end, key)}"
         end
       else
         # begin..end range
         if negate
-          "#{key} < #{quoted(val.begin)} or #{key} > #{quoted(val.end)}"
+          "#{key} < #{quoted(val.begin, key)} or #{key} > #{quoted(val.end, key)}"
         else
-          "#{key} >= #{quoted(val.begin)} and #{key} <= #{quoted(val.end)}"
+          "#{key} >= #{quoted(val.begin, key)} and #{key} <= #{quoted(val.end, key)}"
         end
       end
     end
+    # rubocop: enable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
 
     def build_none
       @null_relation = true

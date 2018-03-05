@@ -1,5 +1,28 @@
 # Change log
 
+## master
+- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again
+
+- [Fixes [#35](https://github.com/palkan/influxer/issues/35)] Support time duration suffix and handle `'s'` and `'ms'` precisions. ([@palkan][])
+
+  [PR](https://github.com/palkan/influxer/pull/36)
+
+  **BREAKING:** `Time`-like value are only typecasted for `time` key.
+
+## 1.1.2
+
+- Support exclusive ranges as `where` arguments. ([@MPursche][])
+
+```ruby
+# range including the end
+where(a: 1..4)
+#=> ... WHERE a >= 1 AND a <= 4
+
+#range excluding the end
+where(a: 1...4)
+#=> ... WHERE a >= 1 AND a < 4
+```
+
 ## 1.1.1
 
 - [Fixes [#31](https://github.com/palkan/influxer/issues/31)] Fix bug with empty arrays in `where` clause
@@ -82,3 +105,6 @@ end
 - Add cache support (using `Rails.cache`)
 - Scopes (default and named)
 - Support for fanout series
+
+[@palkan]: https://github.com/palkan
+[@MPursche]: https://github.com/MPursche
