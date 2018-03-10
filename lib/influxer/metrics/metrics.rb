@@ -225,7 +225,7 @@ module Influxer
     end
 
     def parsed_timestamp
-      quote_timestamp @timestamp, client
+      quote_timestamp_for_write @timestamp, client
     end
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize

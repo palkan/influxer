@@ -2,6 +2,8 @@
 
 ## master
 
+- [Fixes [#40](https://github.com/palkan/influxer/issues/40)] Avoid adding precision suffix to write queries. ([@palkan][])
+
 ## 1.1.5
 
 - [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again. ([@jklimke][])

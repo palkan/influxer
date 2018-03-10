@@ -113,26 +113,12 @@ describe Influxer::Relation, :query do
         expect(rel.to_a).to eq []
       end
 
-      context "with timestamp duration" do
-        around do |ex|
-          old_duration = Influxer.config.time_duration_suffix_enabled
-          Influxer.config.time_duration_suffix_enabled = true
-          ex.run
-          Influxer.config.time_duration_suffix_enabled = old_duration
-        end
-
+      context "with timestamp duration", :duration_suffix do
         it "adds ns suffix to times" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
         end
 
-        context "with different time_precision" do
-          around do |ex|
-            old_precision = Influxer.config.time_precision
-            Influxer.config.time_precision = 's'
-            ex.run
-            Influxer.config.time_precision = old_precision
-          end
-
+        context "with different time_precision", precision: :s do
           it "adds s suffix to times" do
             expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i}s)"
           end
@@ -152,14 +138,7 @@ describe Influxer::Relation, :query do
         end
       end
 
-      context "with different time_precision" do
-        around do |ex|
-          old_precision = Influxer.config.time_precision
-          Influxer.config.time_precision = 's'
-          ex.run
-          Influxer.config.time_precision = old_precision
-        end
-
+      context "with different time_precision", precision: :s do
         it "casts to correct numeric representation" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i})"
         end
