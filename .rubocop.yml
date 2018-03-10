@@ -9,6 +9,7 @@ AllCops:
     - 'spec/dummy/**/*'
     - 'vendor/**/*'
     - 'gemfiles/vendor/**/*'
+    - '**/*.gemfile'
     - Gemfile
     - Rakefile
   DisplayCopNames: true
@@ -16,6 +17,9 @@ AllCops:
   TargetRubyVersion: 2.3
 
 Rails:
+  Enabled: false
+
+Bundler/OrderedGems:
   Enabled: false
 
 Style/SymbolArray:
