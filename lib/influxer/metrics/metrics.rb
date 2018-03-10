@@ -18,7 +18,6 @@ module Influxer
     else
       include ActiveModel::Model
     end
-    # rubocop:enable Style/MixinUsage
 
     include ActiveModel::Validations
     extend ActiveModel::Callbacks
@@ -227,8 +226,6 @@ module Influxer
     def parsed_timestamp
       quote_timestamp_for_write @timestamp, client
     end
-    # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/AbcSize
 
     def unquote(name)
       name.gsub(/(\A['"]|['"]\z)/, '')

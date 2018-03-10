@@ -47,7 +47,7 @@ module Influxer
               "Influxer doesn't support quoting #{val} " \
               " with '#{client.time_precision}' precision. " \
               "Please, convert to numeric value yourself"
-     end
+      end
 
       factorize_timestamp(val, TIME_FACTORS.fetch(client.time_precision))
     end
