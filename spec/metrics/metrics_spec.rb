@@ -269,6 +269,52 @@ describe Influxer::Metrics, :query do
       expect(point.timestamp).to eq(timestamp_test)
     end
 
+    context "with non-default precision", precision: :s do
+      it "test write timestamp with the specified precision" do
+        base_time = Time.now
+        timestamp_test = base_time.to_s
+        expected_time = base_time.to_i
+
+        expect(client)
+          .to receive(:write_point).with(
+            "dummies",
+            { tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time },
+            nil,
+            nil,
+            nil
+          )
+
+        point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+        expect(point.persisted?).to be_truthy
+        expect(point.user_id).to eq 1
+        expect(point.dummy_id).to eq 2
+        expect(point.timestamp).to eq(timestamp_test)
+      end
+    end
+
+    context "when duration suffix is enabled", :duration_suffix do
+      it "test write timestamp without suffix" do
+        base_time = Time.now
+        timestamp_test = base_time.to_s
+        expected_time = (base_time.to_i * 1_000_000_000).to_i
+
+        expect(client)
+          .to receive(:write_point).with(
+            "dummies",
+            { tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time },
+            nil,
+            nil,
+            nil
+          )
+
+        point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+        expect(point.persisted?).to be_truthy
+        expect(point.user_id).to eq 1
+        expect(point.dummy_id).to eq 2
+        expect(point.timestamp).to eq(timestamp_test)
+      end
+    end
+
     it "doesn't write data and return false if invalid" do
       expect(client).not_to receive(:write_point)
       expect(DummyMetrics.write(dummy_id: 2)).to be false

@@ -40,6 +40,18 @@ module Influxer
       "#{factorize_timestamp(val, TIME_FACTORS.fetch(precision))}#{precision}"
     end
 
+    def quote_timestamp_for_write(val, client)
+      if !TIME_FACTORS.keys.include?(client.time_precision) &&
+         !val.is_a?(Numeric)
+        raise ArgumentError,
+              "Influxer doesn't support quoting #{val} " \
+              " with '#{client.time_precision}' precision. " \
+              "Please, convert to numeric value yourself"
+     end
+
+      factorize_timestamp(val, TIME_FACTORS.fetch(client.time_precision))
+    end
+
     def factorize_timestamp(val, factor)
       case val
       when Numeric
