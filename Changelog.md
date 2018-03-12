@@ -1,7 +1,7 @@
 # Change log
 
 ## Misc 
-- Support of year alias in queries
+- Support of year alias in queries ([@dimiii][])
 
 ## master
 
