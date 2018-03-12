@@ -1,5 +1,8 @@
 # Change log
 
+## Misc 
+- Support of year alias in queries ([@dimiii][])
+
 ## master
 
 - [Fixes [#40](https://github.com/palkan/influxer/issues/40)] Avoid adding precision suffix to write queries. ([@palkan][])
@@ -116,3 +119,4 @@ end
 [@palkan]: https://github.com/palkan
 [@MPursche]: https://github.com/MPursche
 [@jklimke]: https://github.com/jklimke
+[@dimiii]: https://github.com/dimiii
