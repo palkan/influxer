@@ -10,7 +10,8 @@ module Influxer
       u: '1u',
       week: '1w',
       day: '1d',
-      month: '30d'
+      month: '30d',
+      year: '365d'
     }.freeze
 
     FILL_RESERVED = %i[null previous none].freeze

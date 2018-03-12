@@ -267,6 +267,10 @@ describe Influxer::Relation, :query do
           expect(rel.time(:month).to_sql).to eq "select * from \"dummy\" group by time(30d)"
         end
 
+        it "group by year" do
+          expect(rel.time(:year).to_sql).to eq "select * from \"dummy\" group by time(365d)"
+        end
+
         it "group by hour and fill" do
           expect(rel.time(:month, fill: 0).to_sql).to eq "select * from \"dummy\" group by time(30d) fill(0)"
         end
