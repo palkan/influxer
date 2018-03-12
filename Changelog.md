@@ -119,3 +119,4 @@ end
 [@palkan]: https://github.com/palkan
 [@MPursche]: https://github.com/MPursche
 [@jklimke]: https://github.com/jklimke
+[@dimiii]: https://github.com/dimiii
