@@ -1,5 +1,14 @@
 # Change log
 
+## 1.1.6
+
+- [Fixes [#41](https://github.com/palkan/influxer/issues/41)] Fix query building with empty arrays in `where` clause ([@dimiii][])
+
+  [PR](https://github.com/palkan/influxer/pull/44)
+
+  **BREAKING:** So far as the latest versions of influxdb fail on queries like `select * from dummy where 1 = 0`, instead of 
+  classic expression `(1 = 0)` influxdb specific `(time < 0)` is used for querying by an empty array. 
+  
 ## Misc 
 - Support of year alias in queries ([@dimiii][])
 
