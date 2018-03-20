@@ -109,7 +109,7 @@ describe Influxer::Relation, :query do
       end
 
       it "handle empty arrays", :aggregate_failures do
-        expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (time < 0)"
         expect(rel.to_a).to eq []
       end
 
@@ -181,8 +181,7 @@ describe Influxer::Relation, :query do
       end
 
       it "handle empty arrays", :aggregate_failures do
-        expect(rel.where.not(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
-        expect(rel.to_a).to eq []
+        expect(rel.where.not(user_id: []).to_sql).to eq "select * from \"dummy\" where (time >= 0)"
       end
 
       context "with tags" do
@@ -194,13 +193,13 @@ describe Influxer::Relation, :query do
 
     describe "#none" do
       it "returns empty array", :aggregate_failures do
-        expect(rel.none.to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.none.to_sql).to eq "select * from \"dummy\" where (time < 0)"
         expect(rel.to_a).to eq []
       end
 
       it "works with chaining", :aggregate_failures do
         expect(rel.none.where.not(user_id: 1, dummy: :a).to_sql)
-          .to eq "select * from \"dummy\" where (1 = 0) and (user_id <> 1) and (dummy <> 'a')"
+          .to eq "select * from \"dummy\" where (time < 0) and (user_id <> 1) and (dummy <> 'a')"
         expect(rel.to_a).to eq []
       end
     end

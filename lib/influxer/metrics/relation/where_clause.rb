@@ -59,7 +59,7 @@ module Influxer
       when Regexp
         "#{key}#{negate ? ' !~ ' : ' =~ '}#{val.inspect}"
       when Array
-        return build_none if val.empty?
+        return build_none(negate) if val.empty?
         build_in(key, val, negate)
       when Range
         build_range(key, val, negate)
@@ -98,9 +98,9 @@ module Influxer
     end
     # rubocop: enable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
 
-    def build_none
-      @null_relation = true
-      build_eql(1, 0, false)
+    def build_none(negate = false)
+      @null_relation = !negate
+      negate ? 'time >= 0' : 'time < 0'
     end
   end
 end

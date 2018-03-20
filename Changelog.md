@@ -1,5 +1,13 @@
 # Change log
 
+## 1.1.6
+
+- [Fixes [#41](https://github.com/palkan/influxer/issues/41)] Fix query building with empty arrays in `where` clause ([@dimiii][])
+
+  [PR](https://github.com/palkan/influxer/pull/44)
+   
+  **BREAKING:** `where.not` now returns non-empty result for an empty array.
+  
 ## Misc 
 - Support of year alias in queries ([@dimiii][])
 
