@@ -17,6 +17,14 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   s.require_paths = ["lib"]
 
+  s.metadata = {
+    "bug_tracker_uri" => "http://github.com/palkan/influxer/issues",
+    "changelog_uri" => "https://github.com/palkan/influxer/blob/master/Changelog.md",
+    "documentation_uri" => "http://github.com/palkan/influxer",
+    "homepage_uri" => "http://github.com/palkan/influxer",
+    "source_code_uri" => "http://github.com/palkan/influxer"
+  }
+
   s.add_dependency "activemodel", '>= 3.2.0'
   s.add_dependency "influxdb", "~> 0.3"
   s.add_dependency "anyway_config", "~> 1.0"
