@@ -5,15 +5,14 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 ENV["RAILS_ENV"] ||= "test"
 
-if ENV["COVER"]
-  require "simplecov"
-  SimpleCov.root File.join(File.dirname(__FILE__), "..")
-  SimpleCov.start
-end
-
 require "rspec"
 require "webmock/rspec"
-require "pry-byebug"
+
+begin
+  require "pry-byebug"
+rescue LoadError # rubocop:disable Lint/HandleExceptions
+end
+
 require "timecop"
 
 require "active_record"
