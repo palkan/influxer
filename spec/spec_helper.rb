@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-ENV["RAILS_ENV"] ||= 'test'
+ENV["RAILS_ENV"] ||= "test"
 
-if ENV['COVER']
-  require 'simplecov'
-  SimpleCov.root File.join(File.dirname(__FILE__), '..')
+if ENV["COVER"]
+  require "simplecov"
+  SimpleCov.root File.join(File.dirname(__FILE__), "..")
   SimpleCov.start
 end
 
-require 'rspec'
+require "rspec"
 require "webmock/rspec"
-require 'pry-byebug'
-require 'timecop'
+require "pry-byebug"
+require "timecop"
 
-require 'active_record'
-require 'sqlite3'
+require "active_record"
+require "sqlite3"
 
 require "influxer"
 
@@ -33,7 +33,7 @@ class Rails
     end
 
     def env
-      'test'
+      "test"
     end
   end
 end
@@ -42,7 +42,7 @@ require "influxer/rails/client"
 
 ActiveRecord::Base.send :include, Influxer::Model
 
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
 Dir["#{File.dirname(__FILE__)}/support/metrics/*.rb"].each { |f| require f }
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }

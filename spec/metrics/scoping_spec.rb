@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe Influxer::Metrics, :query do
   let(:klass) do
     Class.new(Influxer::Metrics) do
-      set_series 'dummy'
+      set_series "dummy"
     end
   end
 

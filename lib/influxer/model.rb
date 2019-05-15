@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_support'
+require "active_support"
 
 module Influxer
   # Add `has_metrics` method to AR::Base
@@ -8,9 +8,6 @@ module Influxer
     extend ActiveSupport::Concern
 
     module ClassMethods # :nodoc:
-      # rubocop:disable Naming/PredicateName
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/AbcSize
       def has_metrics(*args, **params)
         metrics_name = args.empty? ? "metrics" : args.first.to_s
 
@@ -22,12 +19,10 @@ module Influxer
         foreign_key = params.fetch(:foreign_key, to_s.foreign_key)
 
         define_method(metrics_name) do
-          rel_attrs = foreign_key ? { foreign_key => id } : {}
+          rel_attrs = foreign_key ? {foreign_key => id} : {}
 
-          unless attrs.nil?
-            attrs.each do |key|
-              rel_attrs[key] = send(key)
-            end
+          attrs&.each do |key|
+            rel_attrs[key] = send(key)
           end
           Relation.new klass, attributes: rel_attrs
         end

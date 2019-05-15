@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe Influxer::Client do
   let(:conf) { Influxer.config }
@@ -12,9 +12,9 @@ describe Influxer::Client do
     end
 
     it "passes config params" do
-      conf.username = 'admin'
+      conf.username = "admin"
       conf.port = 2222
-      expect(subject.config.username).to eq 'admin'
+      expect(subject.config.username).to eq "admin"
       expect(subject.config.port).to eq 2222
     end
   end
@@ -31,7 +31,7 @@ describe Influxer::Client do
     end
 
     it "should write data to cache with expiration" do
-      conf.cache = { expires_in: 90 }
+      conf.cache = {expires_in: 90}
 
       subject.query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy

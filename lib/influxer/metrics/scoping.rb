@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'influxer/metrics/scoping/default'
-require 'influxer/metrics/scoping/named'
+require "influxer/metrics/scoping/default"
+require "influxer/metrics/scoping/named"
 
 if Influxer.active_model3?
-  require 'influxer/metrics/scoping/old_current_scope'
+  require "influxer/metrics/scoping/old_current_scope"
 else
-  require 'influxer/metrics/scoping/current_scope'
+  require "influxer/metrics/scoping/current_scope"
 end
 
 module Influxer

@@ -39,7 +39,7 @@ module Influxer
 
     # add prefix; remove whitespaces
     def normalized_cache_key(sql)
-      "influxer:#{sql.gsub(/\s*/, '')}"
+      "influxer:#{sql.gsub(/\s*/, "")}"
     end
 
     def logger

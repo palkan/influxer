@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'anyway_config'
+require "anyway_config"
 
 module Influxer
   # Influxer configuration
@@ -28,8 +28,8 @@ module Influxer
                 :denormalize,
                 :udp,
                 :async,
-                database: 'db',
-                time_precision: 'ns',
+                database: "db",
+                time_precision: "ns",
                 cache: false,
                 time_duration_suffix_enabled: false
 

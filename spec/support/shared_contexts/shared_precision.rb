@@ -3,7 +3,7 @@
 shared_context "precision:seconds", precision: :s do
   around do |ex|
     old_precision = Influxer.config.time_precision
-    Influxer.config.time_precision = 's'
+    Influxer.config.time_precision = "s"
     ex.run
     Influxer.config.time_precision = old_precision
   end

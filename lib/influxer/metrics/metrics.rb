@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
-require 'influxer/metrics/relation'
-require 'influxer/metrics/scoping'
-require 'influxer/metrics/quoting/timestamp'
-require 'influxer/metrics/active_model3/model'
+require "influxer/metrics/relation"
+require "influxer/metrics/scoping"
+require "influxer/metrics/quoting/timestamp"
+require "influxer/metrics/active_model3/model"
 
 module Influxer
   class MetricsError < StandardError; end
   class MetricsInvalid < MetricsError; end
 
   # Base class for InfluxDB querying and writing
-  # rubocop:disable Metrics/ClassLength
   class Metrics
     TIME_FACTOR = 1_000_000_000
     if Influxer.active_model3?
@@ -124,7 +123,7 @@ module Influxer
           quoted_series(val.call(instance), write: write)
         when Array
           if val.length > 1
-            "merge(#{val.map { |s| quoted_series(s, write: write) }.join(',')})"
+            "merge(#{val.map { |s| quoted_series(s, write: write) }.join(",")})"
           else
             quoted_series(val.first, write: write)
           end
@@ -132,7 +131,7 @@ module Influxer
           # Only add retention policy when selecting points
           # and not writing
           if !write && retention_policy.present?
-            [quote(@retention_policy), quote(val)].join('.')
+            [quote(@retention_policy), quote(val)].join(".")
           else
             quote(val)
           end
@@ -168,6 +167,7 @@ module Influxer
 
     def write!
       raise MetricsInvalid if invalid?
+
       write
     end
 
@@ -228,7 +228,7 @@ module Influxer
     end
 
     def unquote(name)
-      name.gsub(/(\A['"]|['"]\z)/, '')
+      name.gsub(/(\A['"]|['"]\z)/, "")
     end
   end
 end

@@ -21,7 +21,7 @@ module Influxer
 
     def percentile(name, val, alias_name = nil)
       @values[:has_calculations] = true
-      select_values << "percentile(#{name}, #{val})#{alias_name ? ' as ' + alias_name.to_s : ''}"
+      select_values << "percentile(#{name}, #{val})#{alias_name ? " as " + alias_name.to_s : ""}"
       self
     end
   end

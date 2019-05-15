@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
-require 'active_support/core_ext/module/delegation'
-require 'influxer/metrics/relation/time_query'
-require 'influxer/metrics/relation/calculations'
-require 'influxer/metrics/relation/where_clause'
-require 'influxer/metrics/quoting/timestamp'
+require "active_support/core_ext/module/delegation"
+require "influxer/metrics/relation/time_query"
+require "influxer/metrics/relation/calculations"
+require "influxer/metrics/relation/where_clause"
+require "influxer/metrics/quoting/timestamp"
 
 module Influxer
   # Relation is used to build queries
-  # rubocop:disable Metrics/ClassLength
   class Relation
     include Influxer::TimeQuery
     include Influxer::Calculations
@@ -144,17 +143,17 @@ module Influxer
 
       sql << "from #{build_series_name}"
 
-      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
+      sql << "where #{where_values.join(" and ")}" unless where_values.empty?
 
       unless group_values.empty? && time_value.nil?
-        group_fields = (time_value.nil? ? [] : ['time(' + @values[:time] + ')']) + group_values
+        group_fields = (time_value.nil? ? [] : ["time(" + @values[:time] + ")"]) + group_values
         group_fields.uniq!
-        sql << "group by #{group_fields.join(', ')}"
+        sql << "group by #{group_fields.join(", ")}"
       end
 
       sql << "fill(#{fill_value})" unless fill_value.nil?
 
-      sql << "order by #{order_values.uniq.join(',')}" unless order_values.empty?
+      sql << "order by #{order_values.uniq.join(",")}" unless order_values.empty?
 
       sql << "limit #{limit_value}" unless limit_value.nil?
       sql << "offset #{offset_value}" unless offset_value.nil?
@@ -169,14 +168,15 @@ module Influxer
 
     def to_a
       return @records if loaded?
+
       load
     end
 
     def inspect
       entries = to_a.take(11).map!(&:inspect)
-      entries[10] = '...' if entries.size == 11
+      entries[10] = "..." if entries.size == 11
 
-      "#<#{self.class.name} [#{entries.join(', ')}]>"
+      "#<#{self.class.name} [#{entries.join(", ")}]>"
     end
 
     def empty?
@@ -209,7 +209,7 @@ module Influxer
 
       sql << "from #{@instance.series}"
 
-      sql << "where #{where_values.join(' and ')}" unless where_values.empty?
+      sql << "where #{where_values.join(" and ")}" unless where_values.empty?
 
       sql = sql.join " "
 
@@ -228,6 +228,7 @@ module Influxer
     # rubocop:disable Metrics/MethodLength
     def merge!(rel)
       return self if rel.nil?
+
       MULTI_VALUE_METHODS.each do |method|
         (@values[method] ||= []).concat(rel.values[method]).uniq! unless rel.values[method].nil?
       end
@@ -280,6 +281,7 @@ module Influxer
 
     def get_points(list)
       return list if normalized?
+
       list.reduce([]) do |a, e|
         a + e.fetch("values", []).map { |v| inject_tags(v, e["tags"] || {}) }
       end
@@ -291,11 +293,13 @@ module Influxer
 
     def method_missing(method, *args, &block)
       return super unless @klass.respond_to?(method)
+
       merge!(scoping { @klass.public_send(method, *args, &block) })
     end
 
     def respond_to_missing?(method, *args)
       return true if @klass.respond_to?(method)
+
       super
     end
   end

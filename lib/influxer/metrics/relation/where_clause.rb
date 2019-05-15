@@ -29,6 +29,7 @@ module Influxer
 
     def load
       return if @null_relation
+
       super
     end
 
@@ -57,14 +58,15 @@ module Influxer
       when NilClass
         build_eql(key, /.*/, !negate)
       when Regexp
-        "#{key}#{negate ? ' !~ ' : ' =~ '}#{val.inspect}"
+        "#{key}#{negate ? " !~ " : " =~ "}#{val.inspect}"
       when Array
         return build_none(negate) if val.empty?
+
         build_in(key, val, negate)
       when Range
         build_range(key, val, negate)
       else
-        "#{key}#{negate ? ' <> ' : ' = '}#{quoted(val, key)}"
+        "#{key}#{negate ? " <> " : " = "}#{quoted(val, key)}"
       end
     end
     # rubocop:enable Metrics/CyclomaticComplexity
@@ -75,7 +77,7 @@ module Influxer
       arr.each do |val|
         buf << build_eql(key, val, negate)
       end
-      buf.join(negate ? ' and ' : ' or ').to_s
+      buf.join(negate ? " and " : " or ").to_s
     end
 
     # rubocop: disable Metrics/AbcSize, Metrics/MethodLength, Style/IfInsideElse
@@ -100,7 +102,7 @@ module Influxer
 
     def build_none(negate = false)
       @null_relation = !negate
-      negate ? 'time >= 0' : 'time < 0'
+      negate ? "time >= 0" : "time < 0"
     end
   end
 end

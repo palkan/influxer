@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe User do
-  let(:user) { described_class.create age: 20, gender: 1, email: 'user@example.com' }
+  let(:user) { described_class.create age: 20, gender: 1, email: "user@example.com" }
   subject { user }
 
   specify { is_expected.to respond_to :metrics }
