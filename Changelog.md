@@ -1,6 +1,8 @@
 # Change log
 
-## master
+## master (unreleased)
+
+## 1.2.0 (2019-05-20)
 
 - **Require Ruby 2.4+**
 
