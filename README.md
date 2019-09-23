@@ -14,7 +14,8 @@ Influxer provides an ActiveRecord-style way to work with [InfluxDB](https://infl
   - `since` - get only points since date (e.g. `Metrics.since(Time.utc(2014,12,31)) => # select * ... where time > 1419984000s`);
   - `merge` - merge series.
 - Scopes support
-  ```ruby
+
+```ruby
 class Metrics < Influxer::Metrics
   default_scope -> { time(:hour).limit(1000) }
   tags :account_id
@@ -24,14 +25,15 @@ class Metrics < Influxer::Metrics
 end
 
 Metrics.by_account(1)
-  # => select * from "metrics" group by time(1h) where account_id=1 limit 1000
+# => select * from "metrics" group by time(1h) where account_id=1 limit 1000
 
 Metrics.unlimited.by_account(1).time(:week)
-  # => select * from "metrics" group by time(1w) where account_id=1
+# => select * from "metrics" group by time(1w) where account_id=1
+```
 
-  ```
 - Integrate with your model:
-  ```ruby
+
+```ruby
 class UserVisits < Influxer::Metrics
 end
 
@@ -41,10 +43,10 @@ end
 
 user = User.find(1)
 user.visits.write(page_id: "home")
-  #=> < creates point {user_id: 1, page_id: 'home'} in 'user_visits' series >
+#=> < creates point {user_id: 1, page_id: 'home'} in 'user_visits' series >
 
 user.visits.where(page_id: "home")
-  #=> select * from user_visits where page_id='home'
-  ```
+#=> select * from user_visits where page_id='home'
+```
 
 Find more on [Wiki](https://github.com/palkan/influxer/wiki).
