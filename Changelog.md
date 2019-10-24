@@ -1,7 +1,28 @@
 # Change log
 
-## master
-- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again
+## master (unreleased)
+
+## 1.2.0 (2019-05-20)
+
+- **Require Ruby 2.4+**
+
+## 1.1.6
+
+- [Fixes [#41](https://github.com/palkan/influxer/issues/41)] Fix query building with empty arrays in `where` clause ([@dimiii][])
+
+  [PR](https://github.com/palkan/influxer/pull/44)
+
+  **BREAKING:** `where.not` now returns non-empty result for an empty array.
+
+- Support of year alias in queries ([@dimiii][])
+
+- [Fixes [#40](https://github.com/palkan/influxer/issues/40)] Avoid adding precision suffix to write queries. ([@palkan][])
+
+## 1.1.5
+
+- [Fixes [#37](https://github.com/palkan/influxer/issues/37)] Timestamp ranges are quoted again. ([@jklimke][])
+
+## 1.1.4
 
 - [Fixes [#35](https://github.com/palkan/influxer/issues/35)] Support time duration suffix and handle `'s'` and `'ms'` precisions. ([@palkan][])
 
@@ -108,3 +129,5 @@ end
 
 [@palkan]: https://github.com/palkan
 [@MPursche]: https://github.com/MPursche
+[@jklimke]: https://github.com/jklimke
+[@dimiii]: https://github.com/dimiii

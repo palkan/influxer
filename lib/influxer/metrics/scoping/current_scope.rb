@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_support/per_thread_registry'
+require "active_support/per_thread_registry"
 
 module Influxer
   module Scoping
@@ -39,6 +39,7 @@ module Influxer
 
         def raise_invalid_scope_type!(scope_type)
           return if VALID_SCOPE_TYPES.include?(scope_type)
+
           raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. \
         Scope types  must be included in VALID_SCOPE_TYPES"
         end

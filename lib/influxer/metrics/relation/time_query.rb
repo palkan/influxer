@@ -3,14 +3,15 @@
 module Influxer
   module TimeQuery #:nodoc:
     TIME_ALIASES = {
-      hour: '1h',
-      minute: '1m',
-      second: '1s',
-      ms: '1ms',
-      u: '1u',
-      week: '1w',
-      day: '1d',
-      month: '30d'
+      hour: "1h",
+      minute: "1m",
+      second: "1s",
+      ms: "1ms",
+      u: "1u",
+      week: "1w",
+      day: "1d",
+      month: "30d",
+      year: "365d"
     }.freeze
 
     FILL_RESERVED = %i[null previous none].freeze
@@ -27,10 +28,10 @@ module Influxer
     #    # select * from metrics group by time(4d) fill(0)
     def time(val, options = {})
       @values[:time] = if val.is_a?(Symbol)
-                         TIME_ALIASES[val] || '1' + val.to_s
-                       else
-                         val
-                       end
+        TIME_ALIASES[val] || "1" + val.to_s
+      else
+        val
+      end
 
       build_fill(options[:fill])
       self
@@ -50,7 +51,7 @@ module Influxer
     def past(val)
       case val
       when Symbol
-        where("time > now() - #{TIME_ALIASES[val] || ('1' + val.to_s)}")
+        where("time > now() - #{TIME_ALIASES[val] || ("1" + val.to_s)}")
       when String
         where("time > now() - #{val}")
       else
@@ -75,6 +76,7 @@ module Influxer
 
     def build_fill(val)
       return if val.nil?
+
       fill(FILL_RESERVED.include?(val) ? val.to_s : val.to_i)
     end
   end

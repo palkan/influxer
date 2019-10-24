@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'influxer/version'
-require 'active_model'
+require "influxer/version"
+require "active_model"
+require "active_support/core_ext"
 
 # Rails client for InfluxDB
 module Influxer
@@ -9,16 +10,16 @@ module Influxer
     ActiveModel::VERSION::MAJOR == 3
   end
 
-  require 'influxer/config'
-  require 'influxer/client'
-  require 'influxer/metrics/metrics'
+  require "influxer/config"
+  require "influxer/client"
+  require "influxer/metrics/metrics"
 
   module Model # :nodoc:
-    require 'influxer/model'
+    require "influxer/model"
   end
 
-  require 'influxer/rails/client' if defined?(Rails)
-  require 'influxer/engine' if defined?(Rails)
+  require "influxer/rails/client" if defined?(Rails)
+  require "influxer/engine" if defined?(Rails)
 
   def self.config
     @config ||= Config.new
@@ -33,7 +34,7 @@ module Influxer
   end
 
   def self.reset!
-    @client.stop! unless @client.nil?
+    @client&.stop!
     @config = nil
     @client = nil
   end

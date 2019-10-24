@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'influxer'
+require "influxer"
 
 module Influxer
   class Engine < Rails::Engine # :nodoc:

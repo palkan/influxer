@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'influxdb'
+require "influxdb"
 
 module Influxer
   # InfluxDB API client

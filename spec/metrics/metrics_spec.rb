@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe Influxer::Metrics, :query do
   let(:metrics) { described_class.new }
@@ -96,7 +96,7 @@ describe Influxer::Metrics, :query do
 
     let(:dummy_metrics_3) do
       Class.new(described_class) do
-        set_series /^.*$/
+        set_series(/^.*$/)
       end
     end
 
@@ -128,7 +128,7 @@ describe Influxer::Metrics, :query do
     end
 
     it "sets series as regexp" do
-      expect(dummy_metrics_3.new.series).to eq '/^.*$/'
+      expect(dummy_metrics_3.new.series).to eq "/^.*$/"
     end
 
     it "quotes series" do
@@ -181,13 +181,13 @@ describe Influxer::Metrics, :query do
     end
 
     it "inherits tags" do
-      expect(dummy2.tag_names).to include('dummy_id', 'host', 'zone')
+      expect(dummy2.tag_names).to include("dummy_id", "host", "zone")
     end
 
     it "clones tags" do
       dummy1.tags :status
-      expect(dummy1.tag_names).to include('status')
-      expect(dummy2.tag_names).not_to include('status')
+      expect(dummy1.tag_names).to include("status")
+      expect(dummy2.tag_names).not_to include("status")
     end
   end
 
@@ -217,13 +217,13 @@ describe Influxer::Metrics, :query do
       expect(client)
         .to receive(:write_point).with(
           "dummies",
-          { tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: nil },
+          {tags: {dummy_id: 2, host: "test"}, values: {user_id: 1}, timestamp: nil},
           nil,
           nil,
           nil
         )
 
-      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test')
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: "test")
       expect(point.persisted?).to be_truthy
       expect(point.user_id).to eq 1
       expect(point.dummy_id).to eq 2
@@ -236,13 +236,13 @@ describe Influxer::Metrics, :query do
       expect(client)
         .to receive(:write_point).with(
           "dummies",
-          { tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: expected_time },
+          {tags: {dummy_id: 2, host: "test"}, values: {user_id: 1}, timestamp: expected_time},
           nil,
           nil,
           nil
         )
 
-      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: "test", timestamp: timestamp_test)
       expect(point.persisted?).to be_truthy
       expect(point.user_id).to eq 1
       expect(point.dummy_id).to eq 2
@@ -256,17 +256,63 @@ describe Influxer::Metrics, :query do
       expect(client)
         .to receive(:write_point).with(
           "dummies",
-          { tags: { dummy_id: 2, host: 'test' }, values: { user_id: 1 }, timestamp: (base_time.to_i * 1_000_000_000).to_i },
+          {tags: {dummy_id: 2, host: "test"}, values: {user_id: 1}, timestamp: (base_time.to_i * 1_000_000_000).to_i},
           nil,
           nil,
           nil
         )
 
-      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: 'test', timestamp: timestamp_test)
+      point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: "test", timestamp: timestamp_test)
       expect(point.persisted?).to be_truthy
       expect(point.user_id).to eq 1
       expect(point.dummy_id).to eq 2
       expect(point.timestamp).to eq(timestamp_test)
+    end
+
+    context "with non-default precision", precision: :s do
+      it "test write timestamp with the specified precision" do
+        base_time = Time.now
+        timestamp_test = base_time.to_s
+        expected_time = base_time.to_i
+
+        expect(client)
+          .to receive(:write_point).with(
+            "dummies",
+            {tags: {dummy_id: 2, host: "test"}, values: {user_id: 1}, timestamp: expected_time},
+            nil,
+            nil,
+            nil
+          )
+
+        point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: "test", timestamp: timestamp_test)
+        expect(point.persisted?).to be_truthy
+        expect(point.user_id).to eq 1
+        expect(point.dummy_id).to eq 2
+        expect(point.timestamp).to eq(timestamp_test)
+      end
+    end
+
+    context "when duration suffix is enabled", :duration_suffix do
+      it "test write timestamp without suffix" do
+        base_time = Time.now
+        timestamp_test = base_time.to_s
+        expected_time = (base_time.to_i * 1_000_000_000).to_i
+
+        expect(client)
+          .to receive(:write_point).with(
+            "dummies",
+            {tags: {dummy_id: 2, host: "test"}, values: {user_id: 1}, timestamp: expected_time},
+            nil,
+            nil,
+            nil
+          )
+
+        point = dummy_metrics.write(user_id: 1, dummy_id: 2, host: "test", timestamp: timestamp_test)
+        expect(point.persisted?).to be_truthy
+        expect(point.user_id).to eq 1
+        expect(point.dummy_id).to eq 2
+        expect(point.timestamp).to eq(timestamp_test)
+      end
     end
 
     it "doesn't write data and return false if invalid" do

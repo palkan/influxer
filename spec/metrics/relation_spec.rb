@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe Influxer::Relation, :query do
   let(:rel) { Influxer::Relation.new DummyMetrics }
@@ -25,7 +25,7 @@ describe Influxer::Relation, :query do
 
   describe "#merge!" do
     it "merge multi values" do
-      r1 = rel.where(id: [1, 2], dummy: 'qwe').time(:hour)
+      r1 = rel.where(id: [1, 2], dummy: "qwe").time(:hour)
       r2 = Influxer::Relation.new(DummyMetrics).where.not(user_id: 0).group(:user_id).order(user_id: :asc)
       r1.merge!(r2)
       expect(r1.to_sql)
@@ -69,7 +69,7 @@ describe Influxer::Relation, :query do
     describe "#where" do
       it "generate valid conditions from hash" do
         Timecop.freeze(Time.now)
-        expect(rel.where(user_id: 1, dummy: 'q', time: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy = 'q') and (time = #{(Time.now.to_r * 1_000_000_000).to_i})"
+        expect(rel.where(user_id: 1, dummy: "q", time: Time.now).to_sql).to eq "select * from \"dummy\" where (user_id = 1) and (dummy = 'q') and (time = #{(Time.now.to_r * 1_000_000_000).to_i})"
       end
 
       it "generate valid conditions from strings" do
@@ -109,30 +109,16 @@ describe Influxer::Relation, :query do
       end
 
       it "handle empty arrays", :aggregate_failures do
-        expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.where(user_id: []).to_sql).to eq "select * from \"dummy\" where (time < 0)"
         expect(rel.to_a).to eq []
       end
 
-      context "with timestamp duration" do
-        around do |ex|
-          old_duration = Influxer.config.time_duration_suffix_enabled
-          Influxer.config.time_duration_suffix_enabled = true
-          ex.run
-          Influxer.config.time_duration_suffix_enabled = old_duration
-        end
-
+      context "with timestamp duration", :duration_suffix do
         it "adds ns suffix to times" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{(DateTime.new(2015).to_time.to_r * 1_000_000_000).to_i}ns)"
         end
 
-        context "with different time_precision" do
-          around do |ex|
-            old_precision = Influxer.config.time_precision
-            Influxer.config.time_precision = 's'
-            ex.run
-            Influxer.config.time_precision = old_precision
-          end
-
+        context "with different time_precision", precision: :s do
           it "adds s suffix to times" do
             expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i}s)"
           end
@@ -141,7 +127,7 @@ describe Influxer::Relation, :query do
         context "with unsupported time_precision" do
           around do |ex|
             old_precision = Influxer.config.time_precision
-            Influxer.config.time_precision = 'h'
+            Influxer.config.time_precision = "h"
             ex.run
             Influxer.config.time_precision = old_precision
           end
@@ -152,14 +138,7 @@ describe Influxer::Relation, :query do
         end
       end
 
-      context "with different time_precision" do
-        around do |ex|
-          old_precision = Influxer.config.time_precision
-          Influxer.config.time_precision = 's'
-          ex.run
-          Influxer.config.time_precision = old_precision
-        end
-
+      context "with different time_precision", precision: :s do
         it "casts to correct numeric representation" do
           expect(rel.where(time: DateTime.new(2015)).to_sql).to eq "select * from \"dummy\" where (time = #{DateTime.new(2015).to_time.to_i})"
         end
@@ -171,7 +150,7 @@ describe Influxer::Relation, :query do
         end
 
         it "array tag values" do
-          expect(rel.where(dummy_id: [10, 'some']).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10' or dummy_id = 'some')"
+          expect(rel.where(dummy_id: [10, "some"]).to_sql).to eq "select * from \"dummy\" where (dummy_id = '10' or dummy_id = 'some')"
         end
 
         it "nil value" do
@@ -202,8 +181,7 @@ describe Influxer::Relation, :query do
       end
 
       it "handle empty arrays", :aggregate_failures do
-        expect(rel.where.not(user_id: []).to_sql).to eq "select * from \"dummy\" where (1 = 0)"
-        expect(rel.to_a).to eq []
+        expect(rel.where.not(user_id: []).to_sql).to eq "select * from \"dummy\" where (time >= 0)"
       end
 
       context "with tags" do
@@ -215,13 +193,13 @@ describe Influxer::Relation, :query do
 
     describe "#none" do
       it "returns empty array", :aggregate_failures do
-        expect(rel.none.to_sql).to eq "select * from \"dummy\" where (1 = 0)"
+        expect(rel.none.to_sql).to eq "select * from \"dummy\" where (time < 0)"
         expect(rel.to_a).to eq []
       end
 
       it "works with chaining", :aggregate_failures do
         expect(rel.none.where.not(user_id: 1, dummy: :a).to_sql)
-          .to eq "select * from \"dummy\" where (1 = 0) and (user_id <> 1) and (dummy <> 'a')"
+          .to eq "select * from \"dummy\" where (time < 0) and (user_id <> 1) and (dummy <> 'a')"
         expect(rel.to_a).to eq []
       end
     end
@@ -288,6 +266,10 @@ describe Influxer::Relation, :query do
           expect(rel.time(:month).to_sql).to eq "select * from \"dummy\" group by time(30d)"
         end
 
+        it "group by year" do
+          expect(rel.time(:year).to_sql).to eq "select * from \"dummy\" group by time(365d)"
+        end
+
         it "group by hour and fill" do
           expect(rel.time(:month, fill: 0).to_sql).to eq "select * from \"dummy\" group by time(30d) fill(0)"
         end
@@ -318,7 +300,7 @@ describe Influxer::Relation, :query do
       end
 
       it "generate order from string" do
-        expect(rel.order('cpu desc, val asc').to_sql).to eq "select * from \"dummy\" order by cpu desc, val asc"
+        expect(rel.order("cpu desc, val asc").to_sql).to eq "select * from \"dummy\" order by cpu desc, val asc"
       end
     end
 
@@ -364,18 +346,18 @@ describe Influxer::Relation, :query do
 
       context "with aliases" do
         it "select count as alias" do
-          expect(rel.count(:val, 'total').to_sql).to eq "select count(val) as total from \"dummy\""
+          expect(rel.count(:val, "total").to_sql).to eq "select count(val) as total from \"dummy\""
         end
 
         it "select percentile as alias" do
-          expect(rel.percentile(:val, 90, 'p1').to_sql).to eq "select percentile(val, 90) as p1 from \"dummy\""
+          expect(rel.percentile(:val, 90, "p1").to_sql).to eq "select percentile(val, 90) as p1 from \"dummy\""
         end
       end
     end
 
     context "complex queries" do
       it "group + where" do
-        expect(rel.count('user_id').group(:traffic_source).fill(0).where(user_id: 123).past('28d').to_sql)
+        expect(rel.count("user_id").group(:traffic_source).fill(0).where(user_id: 123).past("28d").to_sql)
           .to eq "select count(user_id) from \"dummy\" where (user_id = 123) and (time > now() - 28d) " \
                  "group by traffic_source fill(0)"
       end
@@ -396,7 +378,7 @@ describe Influxer::Relation, :query do
 
   describe "#empty?" do
     it "return false if has points" do
-      allow(client).to receive(:query) { [{ "values" => [{ time: 1, id: 2 }] }] }
+      allow(client).to receive(:query) { [{"values" => [{time: 1, id: 2}]}] }
       expect(rel.empty?).to be_falsey
       expect(rel.present?).to be_truthy
     end
@@ -424,7 +406,7 @@ describe Influxer::Relation, :query do
     end
 
     it "with tags" do
-      expect(rel.where(dummy_id: 1, host: 'eu').delete_all)
+      expect(rel.where(dummy_id: 1, host: "eu").delete_all)
         .to eq "drop series from \"dummy\" where (dummy_id = '1') and (host = 'eu')"
     end
 

@@ -1,77 +1,57 @@
+require:
+  - standard/cop/semantic_blocks
+  - rubocop-md
+
+inherit_gem:
+  standard: config/base.yml
+
 AllCops:
-  # Include gemspec and Rakefile
-  Include:
-    - 'lib/**/*.rb'
-    - 'lib/**/*.rake'
-    - 'spec/**/*.rb'
   Exclude:
-    - 'bin/**/*'
-    - 'spec/dummy/**/*'
+    - 'bin/*'
+    - 'tmp/**/*'
+    - 'docs/**/*'
+    - 'Gemfile'
     - 'vendor/**/*'
-    - 'gemfiles/vendor/**/*'
-    - Gemfile
-    - Rakefile
+    - 'gemfiles/**/*'
   DisplayCopNames: true
-  StyleGuideCopsOnly: false
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.4
 
-Rails:
+Standard/SemanticBlocks:
   Enabled: false
 
-Style/SymbolArray:
-  Enabled: false
-
-Style/SafeNavigation:
-  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: true
 
 Naming/AccessorMethodName:
   Enabled: false
 
-Style/TrivialAccessors:
-  Enabled: false
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: no_comma
 
-Style/Documentation:
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: no_comma
+
+Layout/AlignParameters:
+  EnforcedStyle: with_first_parameter
+
+Lint/Void:
   Exclude:
-    - 'spec/**/*.rb'
+    - '**/*.md'
 
-Style/StringLiterals: 
-  Enabled: false
-
-Style/DateTime:
+# See https://github.com/rubocop-hq/rubocop/issues/4222
+Lint/AmbiguousBlockAssociation:
   Exclude:
-    - 'spec/**/*.rb'
+    - 'spec/**/*'
+    - '**/*.md'
 
-Naming/SpaceInsideStringInterpolation:
-  EnforcedStyle: no_space
-
-Style/BlockDelimiters:
+Lint/DuplicateMethods:
   Exclude:
-    - 'spec/**/*.rb'
+    - '**/*.md'
 
-Lint/MissingCopEnableDirective:
-  Enabled: false
-
-Lint/AmbiguousRegexpLiteral:
-  Enabled: false
-
-Metrics/BlockLength:
+Naming/FileName:
   Exclude:
-    - 'spec/**/*.rb'
+    - '**/*.md'
 
-Metrics/MethodLength:
+Layout/InitialIndentation:
   Exclude:
-    - 'spec/**/*.rb'
-
-Metrics/LineLength:
-  Max: 100
-  Exclude:
-    - 'spec/**/*.rb'
-
-Rails/Date:
-  Enabled: false
-
-Rails/TimeZone:
-  Enabled: false
-
-Gemspec/OrderedDependencies:
-  Enabled: false
+    - 'CHANGELOG.md'

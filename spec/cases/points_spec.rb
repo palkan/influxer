@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 describe DummyMetrics do
   before do
     stub_request(:get, "http://localhost:8086/query")
       .with(
-        query: { q: 'select * from "dummy"', u: "root", p: "root", precision: 'ns', db: 'db' }
+        query: {q: 'select * from "dummy"', u: "root", p: "root", precision: "ns", db: "db"}
       )
       .to_return(body: fixture_file)
   end
 
   context "single_series" do
-    let(:fixture_file) { File.read('./spec/fixtures/single_series.json') }
+    let(:fixture_file) { File.read("./spec/fixtures/single_series.json") }
 
     context "default format (values merged with tags)" do
       subject { described_class.all.to_a }
@@ -25,7 +25,7 @@ describe DummyMetrics do
   end
 
   context "empty result" do
-    let(:fixture_file) { File.read('./spec/fixtures/empty_result.json') }
+    let(:fixture_file) { File.read("./spec/fixtures/empty_result.json") }
 
     subject { described_class.all.to_a }
 
