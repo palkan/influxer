@@ -22,11 +22,11 @@ module Influxer
 
     MULTI_KEY_METHODS = %i[fanout].freeze
 
-    SINGLE_VALUE_METHODS = %i[fill time limit offset slimit soffset from normalized].freeze
+    SINGLE_VALUE_METHODS = %i[fill time limit offset slimit soffset from normalized timezone].freeze
 
     MULTI_VALUE_SIMPLE_METHODS = %i[select group].freeze
 
-    SINGLE_VALUE_SIMPLE_METHODS = %i[fill limit offset slimit soffset from].freeze
+    SINGLE_VALUE_SIMPLE_METHODS = %i[fill limit offset slimit soffset from timezone].freeze
 
     MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
@@ -121,6 +121,13 @@ module Influxer
       self
     end
 
+    def timezone(val)
+      return self if val.blank?
+
+      @values[:timezone] = val
+      self
+    end
+
     def order(val)
       case val
       when Hash
@@ -159,6 +166,7 @@ module Influxer
       sql << "offset #{offset_value}" unless offset_value.nil?
       sql << "slimit #{slimit_value}" unless slimit_value.nil?
       sql << "soffset #{soffset_value}" unless soffset_value.nil?
+      sql << "TZ('#{timezone_value}')" unless timezone_value.blank?
       sql.join " "
     end
     # rubocop:enable Metrics/AbcSize
