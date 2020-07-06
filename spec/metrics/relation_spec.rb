@@ -491,7 +491,7 @@ describe Influxer::Relation, :query do
   describe "#timezone" do
     it "should attach timezone call if timezone is set" do
       expect(client).to receive(:query).with('select * from "dummy" TZ(\'Europe/Berlin\')', denormalize: true, epoch: nil).and_return []
-      result = DummyMetrics.timezone("Europe/Berlin").all.to_a
+      DummyMetrics.timezone("Europe/Berlin").all.to_a
     end
   end
 end
