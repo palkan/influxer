@@ -47,7 +47,7 @@ Now you can use your metrics classes in a similar way to Active Record models to
 VisitsMetrics.select(:account_id, :user_id).where(page_id: /^home\/.*/)
 ```
 
-Influer provides special query methods for dealing with time series:
+Influxer provides special query methods for dealing with time series:
 
 - Group by time: `Metrics.time(:hour) => # select * ... group by time(1h)`.
 - Select only points for the last hour/minute/whatever: `Metrics.past(:day) => # select * ... where time > now() - 1d`.

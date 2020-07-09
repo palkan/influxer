@@ -28,11 +28,11 @@
 
 ## 1.1.4
 
-- [Fixes [#35](https://github.com/palkan/influxer/issues/35)] Support time duration suffix and handle `'s'` and `'ms'` precisions. ([@palkan][])
+- [Fixes [#35](https://github.com/palkan/influxer/issues/35)] Support time duration suffix and handle `'s'` and `'ms'` precision. ([@palkan][])
 
   [PR](https://github.com/palkan/influxer/pull/36)
 
-  **BREAKING:** `Time`-like value are only typecasted for `time` key.
+  **BREAKING:** `Time`-like value are only type-casted for `time` key.
 
 ## 1.1.2
 
