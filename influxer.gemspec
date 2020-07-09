@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.push File.expand_path("lib", __dir__)
-
-require "influxer/version"
+require_relative "lib/influxer/version"
 
 Gem::Specification.new do |s|
   s.name        = "influxer"
@@ -14,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = "InfluxDB the Rails way"
   s.license     = "MIT"
 
-  s.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
+  s.files = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt CHANGELOG.md]
   s.require_paths = ["lib"]
 
   s.required_ruby_version = ">= 2.4.0"
