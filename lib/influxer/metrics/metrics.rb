@@ -33,7 +33,7 @@ module Influxer
           [
             :write, :write!, :select, :where,
             :group, :time, :past, :since,
-            :limit, :offset, :fill, :delete_all, :epoch
+            :limit, :offset, :fill, :delete_all, :epoch, :timezone
           ] + Influxer::Calculations::CALCULATION_METHODS
         ),
         to: :all

@@ -2,6 +2,10 @@
 
 ## master (unreleased)
 
+- Support for setting timezone in queries to configure influx time calculations, e.g., time epoch aggregation ([@jklimke][])
+
+  [PR](https://github.com/palkan/influxer/pull/46)
+
 ## 1.2.0 (2019-05-20)
 
 - **Require Ruby 2.4+**

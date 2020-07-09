@@ -104,5 +104,11 @@ module Influxer
       @null_relation = !negate
       negate ? "time >= 0" : "time < 0"
     end
+
+    def where_contains_time?
+      where_values.any? do |where_clause|
+        /time( )/ === where_clause
+      end
+    end
   end
 end

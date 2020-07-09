@@ -328,6 +328,12 @@ describe Influxer::Relation, :query do
       end
     end
 
+    describe "#timezone" do
+      it "generate valid soffset" do
+        expect(rel.soffset(10).timezone("Europe/Berlin").to_sql).to eq "select * from \"dummy\" soffset 10 TZ('Europe/Berlin')"
+      end
+    end
+
     context "calculations" do
       context "one arg calculation methods" do
         [
@@ -373,6 +379,12 @@ describe Influxer::Relation, :query do
           .to eq "select * from \"dummy\" where (account_id = 123) " \
                  "offset 10 slimit 10"
       end
+
+      it "offset + slimit + timezone" do
+        expect(rel.where(account_id: 123).slimit(10).offset(10).timezone("Europe/Berlin").to_sql)
+          .to eq "select * from \"dummy\" where (account_id = 123) " \
+                 "offset 10 slimit 10 TZ('Europe/Berlin')"
+      end
     end
   end
 
@@ -408,6 +420,17 @@ describe Influxer::Relation, :query do
     it "with tags" do
       expect(rel.where(dummy_id: 1, host: "eu").delete_all)
         .to eq "drop series from \"dummy\" where (dummy_id = '1') and (host = 'eu')"
+    end
+
+    it "with time" do
+      expect(rel.where(time: Time.parse("2018-01-01T12:00:00.000Z")).delete_all)
+        .to eq("delete from \"dummy\" where (time = 1514808000000000000)")
+    end
+
+    it "with time range" do
+      range = Time.parse("2018-01-01T12:00:00.000Z")..Time.parse("2018-01-02T12:00:00.000Z")
+      expect(rel.where(time: range).delete_all)
+        .to eq("delete from \"dummy\" where (time >= 1514808000000000000 and time <= 1514894400000000000)")
     end
   end
 
@@ -462,6 +485,13 @@ describe Influxer::Relation, :query do
     it "invalid epoch format" do
       expect(client).to receive(:query).with('select * from "dummy"', denormalize: true, epoch: nil).and_return []
       DummyMetrics.epoch(:invalid).all.to_a
+    end
+  end
+
+  describe "#timezone" do
+    it "should attach timezone call if timezone is set" do
+      expect(client).to receive(:query).with('select * from "dummy" TZ(\'Europe/Berlin\')', denormalize: true, epoch: nil).and_return []
+      DummyMetrics.timezone("Europe/Berlin").all.to_a
     end
   end
 end
