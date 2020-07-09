@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+## 1.2.1 (2020-07-09)
+
 - Support for setting timezone in queries to configure influx time calculations, e.g., time epoch aggregation ([@jklimke][])
 
   [PR](https://github.com/palkan/influxer/pull/46)
