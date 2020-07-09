@@ -1,4 +1,4 @@
-[![Gem Version](https://badge.fury.io/rb/influxer.svg)](https://rubygems.org/gems/influxer) [![Build Status](https://travis-ci.org/palkan/influxer.svg?branch=master)](https://travis-ci.org/palkan/influxer)
+![Build](https://github.com/palkan/influxer/workflows/Build/badge.svg)
 
 # Influxer
 
