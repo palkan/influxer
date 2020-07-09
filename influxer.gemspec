@@ -3,14 +3,14 @@
 require_relative "lib/influxer/version"
 
 Gem::Specification.new do |s|
-  s.name        = "influxer"
-  s.version     = Influxer::VERSION
-  s.authors     = ["Vlad Dem"]
-  s.email       = ["dementiev.vm@gmail.com"]
-  s.homepage    = "http://github.com/palkan/influxer"
-  s.summary     = "InfluxDB for Rails"
+  s.name = "influxer"
+  s.version = Influxer::VERSION
+  s.authors = ["Vlad Dem"]
+  s.email = ["dementiev.vm@gmail.com"]
+  s.homepage = "http://github.com/palkan/influxer"
+  s.summary = "InfluxDB for Rails"
   s.description = "InfluxDB the Rails way"
-  s.license     = "MIT"
+  s.license = "MIT"
 
   s.files = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt CHANGELOG.md]
   s.require_paths = ["lib"]

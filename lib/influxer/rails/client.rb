@@ -33,7 +33,7 @@ module Influxer
     # of config.cache if defined
     def cache_options(sql = nil)
       options = Influxer.config.cache.dup
-      options[:expires_in] = (options[:cache_now_for] || 60) if sql =~ /\snow\(\)/
+      options[:expires_in] = (options[:cache_now_for] || 60) if /\snow\(\)/.match?(sql)
       options
     end
 

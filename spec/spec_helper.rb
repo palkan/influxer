@@ -43,8 +43,8 @@ ActiveRecord::Base.send :include, Influxer::Model
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
-Dir["#{File.dirname(__FILE__)}/support/metrics/*.rb"].each { |f| require f }
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/metrics/*.rb"].sort.each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
 
 WebMock.disable_net_connect!
 
