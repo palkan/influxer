@@ -219,7 +219,7 @@ module Influxer
         ["drop series"]
       end
 
-      sql << "from #{@instance.series}"
+      sql << "from #{@instance.series(write: true)}"
 
       sql << "where #{where_values.join(" and ")}" unless where_values.empty?
 
