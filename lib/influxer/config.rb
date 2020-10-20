@@ -28,15 +28,16 @@ module Influxer
                 :denormalize,
                 :udp,
                 :async,
+                :cache_enabled,
                 database: "db",
                 time_precision: "ns",
-                cache: false,
+                cache: {}.with_indifferent_access,
                 time_duration_suffix_enabled: false
 
     def load(*)
       super
       # we want pass @cache value as options to cache store, so we want it to be a Hash
-      @cache = {}.with_indifferent_access if @cache == true
+      self.cache_enabled = false if cache.blank?
     end
   end
 end
