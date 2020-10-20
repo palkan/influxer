@@ -6,10 +6,10 @@ module Influxer
   class Client
     def query(sql, options = {})
       log_sql(sql) do
-        if !options.fetch(:cache, true) || Influxer.config.cache == false
-          super(sql, options)
+        if !options.fetch(:cache, true) || Influxer.config.cache_enabled == false
+          super(sql, **options)
         else
-          Rails.cache.fetch(normalized_cache_key(sql), cache_options(sql)) { super(sql, options) }
+          Rails.cache.fetch(normalized_cache_key(sql), **cache_options(sql)) { super(sql, **options) }
         end
       end
     end
@@ -34,7 +34,7 @@ module Influxer
     def cache_options(sql = nil)
       options = Influxer.config.cache.dup
       options[:expires_in] = (options[:cache_now_for] || 60) if /\snow\(\)/.match?(sql)
-      options
+      options.symbolize_keys
     end
 
     # add prefix; remove whitespaces
