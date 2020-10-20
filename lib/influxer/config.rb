@@ -37,7 +37,7 @@ module Influxer
     def load(*)
       super
       # we want pass @cache value as options to cache store, so we want it to be a Hash
-      self.cache_enabled = false if cache.blank?
+      self.cache_enabled = false if cache.blank? || self.cache_enabled == false
     end
   end
 end

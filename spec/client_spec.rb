@@ -23,15 +23,41 @@ describe Influxer::Client do
     let(:q) { "list series" }
     after { Rails.cache.clear }
 
-    it "writes data to cache" do
+    
+    it "does not write data to cache by default" do
+      conf.cache = {}      
+
+      subject.query(q)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
+    end
+
+    it "does not write data to cache if disabled" do
       conf.cache = {}
+      conf.cache_enabled = false
+
+      subject.query(q)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
+    end
+
+    it "writes data to cache if enabled" do
+      conf.cache = {}
+      conf.cache_enabled = true
 
       subject.query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
     end
+    
+    it "should not write data to cache with expiration if disabled" do
+      conf.cache = { expires_in: 90 }
+      conf.cache_enabled = false
+
+      subject.query(q)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_falsey      
+    end
 
     it "should write data to cache with expiration" do
       conf.cache = {expires_in: 90}
+      conf.cache_enabled = true
 
       subject.query(q)
       expect(Rails.cache.exist?("influxer:listseries")).to be_truthy
