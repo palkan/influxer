@@ -42,5 +42,20 @@ describe Influxer::Client do
       Timecop.travel(2.minutes.from_now)
       expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
     end
+
+    it "does not write data to cache if disabled" do
+      conf.cache = {}
+      conf.cache_enabled = false
+
+      subject.query(q)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
+    end
+
+    it "does not write data to cache without cache config" do
+      conf.cache = nil
+
+      subject.query(q)
+      expect(Rails.cache.exist?("influxer:listseries")).to be_falsey
+    end
   end
 end

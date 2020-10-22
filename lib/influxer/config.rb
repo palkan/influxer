@@ -29,13 +29,27 @@ module Influxer
                 :udp,
                 :async,
                 :cache_enabled,
+                :cache,
                 database: "db",
                 time_precision: "ns",
-                cache: {}.with_indifferent_access,
                 time_duration_suffix_enabled: false
 
-    def cache_enabled?
-      cache&.any? || false
+    def load(*)
+      super
+      if cache_enabled.nil?
+        self.cache_enabled = cache_enabled_value
+      end
+    end
+
+    def cache=(value)
+      super
+      self.cache_enabled = cache_enabled_value
+    end
+
+    private
+
+    def cache_enabled_value
+      !(cache == false || cache.nil?)
     end
   end
 end
