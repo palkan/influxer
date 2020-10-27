@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+## 1.2.2 (2020-10-27)
+
 - Fixes [#49](https://github.com/palkan/influxer/issues/49)  Cache hash configuration cannot be applied.([@AlexanderShvaykin][])
 - Fixes [#47](https://github.com/palkan/influxer/issues/47) Can't delete data when retention policy is set for a metric. ([@MPursche][])
 
