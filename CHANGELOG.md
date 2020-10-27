@@ -2,6 +2,9 @@
 
 ## master (unreleased)
 
+- Fixes [#49](https://github.com/palkan/influxer/issues/49)  Cache hash configuration cannot be applied.([@AlexanderShvaykin][])
+- Fixes [#47](https://github.com/palkan/influxer/issues/47) Can't delete data when retention policy is set for a metric. ([@MPursche][])
+
 ## 1.2.1 (2020-07-09)
 
 - Support for setting timezone in queries to configure influx time calculations, e.g., time epoch aggregation ([@jklimke][])
@@ -90,3 +93,4 @@ See [changelog](https://github.com/palkan/influxer/blob/1.0.0/Changelog.md) for 
 [@MPursche]: https://github.com/MPursche
 [@jklimke]: https://github.com/jklimke
 [@dimiii]: https://github.com/dimiii
+[@AlexanderShvaykin]: https://github.com/AlexanderShvaykin
