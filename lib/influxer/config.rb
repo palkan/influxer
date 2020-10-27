@@ -49,7 +49,7 @@ module Influxer
     private
 
     def cache_enabled_value
-      !(cache == false || cache.nil?)
+      !!cache
     end
   end
 end
