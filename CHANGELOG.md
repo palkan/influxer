@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+- Fixes [#53](https://github.com/palkan/influxer/issues/53) Influxer client configuration issue with anyway config v2 and higher.([@AlexanderShvaykin][])
+
 ## 1.2.2 (2020-10-27)
 
 - Fixes [#49](https://github.com/palkan/influxer/issues/49)  Cache hash configuration cannot be applied.([@AlexanderShvaykin][])
