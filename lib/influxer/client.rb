@@ -6,7 +6,7 @@ module Influxer
   # InfluxDB API client
   class Client < ::InfluxDB::Client
     def initialize
-      super Influxer.config.as_json.symbolize_keys!
+      super Influxer.config.to_h.symbolize_keys
     end
 
     def time_precision
