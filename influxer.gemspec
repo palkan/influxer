@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "activemodel", ">= 3.2.0"
   s.add_dependency "influxdb", "~> 0.3"
-  s.add_dependency "anyway_config", ">= 1.0"
+  s.add_dependency "anyway_config", ">= 2.0"
 
   s.add_development_dependency "timecop"
   s.add_development_dependency "rake", "~> 10.1"
