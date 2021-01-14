@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+## 1.3.0 (2020-10-27)
+
 - Fixes [#53](https://github.com/palkan/influxer/issues/53) Influxer client configuration issue with anyway config v2 and higher.([@AlexanderShvaykin][])
 
 ## 1.2.2 (2020-10-27)
