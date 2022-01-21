@@ -18,6 +18,8 @@ require "timecop"
 require "active_record"
 require "sqlite3"
 
+ActiveSupport::Deprecation.behavior = :raise
+
 require "influxer"
 
 # Rails stub
