@@ -2,6 +2,11 @@
 
 ## master (unreleased)
 
+- Fixes [#55](https://github.com/palkan/influxer/issues/55) Rails 7 deprecation warning
+- Add Ruby3 Support
+- Updates influxdb client dependency
+- Removes Ruby 2.4 supporting
+
 ## 1.3.0 (2020-10-27)
 
 - Fixes [#53](https://github.com/palkan/influxer/issues/53) Influxer client configuration issue with anyway config v2 and higher.([@AlexanderShvaykin][])
