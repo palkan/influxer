@@ -10,6 +10,10 @@ module Influxer
     ActiveModel::VERSION::MAJOR == 3
   end
 
+  def self.thread_registry_support?
+    ActiveModel::VERSION::MAJOR < 7
+  end
+
   require "influxer/config"
   require "influxer/client"
   require "influxer/metrics/metrics"

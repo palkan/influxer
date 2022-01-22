@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-require "active_support/per_thread_registry"
+if Influxer.thread_registry_support?
+  require "active_support/per_thread_registry"
+else
+  require "active_support/core_ext/module/delegation"
+end
 
 module Influxer
   module Scoping
@@ -15,7 +19,17 @@ module Influxer
       end
 
       class ScopeRegistry # :nodoc:
-        extend ActiveSupport::PerThreadRegistry
+        if Influxer.thread_registry_support?
+          extend ActiveSupport::PerThreadRegistry
+        else
+          class << self
+            delegate :value_for, :set_value_for, to: :instance
+
+            def instance
+              ActiveSupport::IsolatedExecutionState[:influxer_scope_registry] ||= new
+            end
+          end
+        end
 
         VALID_SCOPE_TYPES = [:current_scope].freeze
 

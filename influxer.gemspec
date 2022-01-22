@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.files = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt CHANGELOG.md]
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = ">= 2.4.0"
+  s.required_ruby_version = ">= 2.5.0"
 
   s.metadata = {
     "bug_tracker_uri" => "http://github.com/palkan/influxer/issues",
@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   }
 
   s.add_dependency "activemodel", ">= 3.2.0"
-  s.add_dependency "influxdb", "~> 0.3"
+  s.add_dependency "influxdb", "~> 0.8"
   s.add_dependency "anyway_config", ">= 2.0"
 
   s.add_development_dependency "timecop"
