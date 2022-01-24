@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+## 1.4.0 (2022-01-24)
+
 - Fixes [#55](https://github.com/palkan/influxer/issues/55) Rails 7 deprecation warning
 - Add Ruby3 Support
 - Updates InfluxDB client dependency
