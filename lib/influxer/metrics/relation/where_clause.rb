@@ -35,7 +35,7 @@ module Influxer
 
     protected
 
-    def build_where(args, hargs, negate)      
+    def build_where(args, hargs, negate)
       if args.present?
         if args[0].is_a?(String)
           where_values.concat(args.map { |str| "(#{str})" })
