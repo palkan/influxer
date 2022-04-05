@@ -35,9 +35,15 @@ module Influxer
 
     protected
 
-    def build_where(args, hargs, negate)
-      if args.present? && args[0].is_a?(String)
-        where_values.concat(args.map { |str| "(#{str})" })
+    def build_where(args, hargs, negate)      
+      if args.present?
+        if args[0].is_a?(String)
+          where_values.concat(args.map { |str| "(#{str})" })
+        elsif args[0].is_a?(Hash)
+          build_hash_where(args[0], negate)
+        else
+          false
+        end
       elsif hargs.present?
         build_hash_where(hargs, negate)
       else
