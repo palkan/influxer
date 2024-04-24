@@ -16,13 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["2.7"]
+        ruby: ["2.7", "3.1"]
         gemfile: [
           "gemfiles/rails6.gemfile",
+          "gemfiles/rails7.gemfile"
         ]
-        include:
-        - ruby: "3.1"
-          gemfile: "gemfiles/rails7.gemfile"
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v1
