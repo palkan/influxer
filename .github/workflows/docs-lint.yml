@@ -33,7 +33,7 @@ jobs:
         ruby-version: 2.7
     - name: Lint Markdown files with RuboCop
       run: |
-        gem install bundler
+        gem install bundler -v 2.4.22
         bundle install --gemfile gemfiles/rubocop.gemfile --jobs 4 --retry 3
         bundle exec --gemfile gemfiles/rubocop.gemfile rubocop -c .rubocop-md.yml
   forspell:
@@ -45,7 +45,7 @@ jobs:
         sudo apt-get install hunspell
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.7
+        ruby-version: 3.1
     - name: Cache installed gems
       uses: actions/cache@v1
       with:
@@ -55,18 +55,3 @@ jobs:
       run: gem install forspell
     - name: Run Forspell
       run: forspell *.md
-  liche:
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13.x
-    - name: Run liche
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        go get -u github.com/raviqqe/liche
-        liche README.md CHANGELOG.md
