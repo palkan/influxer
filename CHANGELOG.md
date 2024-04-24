@@ -2,6 +2,7 @@
 
 ## master (unreleased)
 
+- Upgraded Ruby and Rails version to Ruby 2.7.6 and Rails 6
 - added support for providing hash objects as arguments to where condition in ruby >= 3
 
 ## 1.4.0 (2022-01-24)
