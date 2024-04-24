@@ -18,7 +18,11 @@ require "timecop"
 require "active_record"
 require "sqlite3"
 
-ActiveSupport::Deprecation.behavior = :raise
+# In rails 7 add own deprecation object
+# https://github.com/rails/rails/commit/e5af9c298a108469a43758297ab56d12b3f0ddcf#diff-c92225c96a8ba2fd9443834863f5f164d55c4847331168a5f9a00d2fe7923aae
+if ActiveModel::VERSION::MAJOR < 7
+  ActiveSupport::Deprecation.behavior = :raise
+end
 
 require "influxer"
 
