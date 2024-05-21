@@ -84,7 +84,7 @@ module Influxer
       @klass = klass
       @instance = klass.new params[:attributes]
       reset
-      where(params[:attributes]) if params[:attributes].present?
+      where(**params[:attributes]) if params[:attributes].present?
     end
 
     def write(params = {})
