@@ -1,4 +1,4 @@
-![Build](https://github.com/palkan/influxer/workflows/Build/badge.svg)
+![Build](https://github.com/palkan/influxer/workflows/Rspec/badge.svg)
 
 # Influxer
 
